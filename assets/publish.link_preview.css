@@ -1,0 +1,18 @@
+/*
+	Copyight: Deux Huit Huit 2013
+	License: MIT, http://deuxhuithuit.mit-license.org
+*/
+
+/**
+ * CSS for link_preview
+ *
+ * @author deuxhuithuit
+ */
+
+.field-link_preview {
+	display: none;
+}
+
+#breadcrumbs .link-preview {
+	margin-left: 20px;
+}

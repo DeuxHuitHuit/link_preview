@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension id="link_preview" status="experimental" xmlns="http://symphony-cms.com/schemas/extension/1.0">
+	<name>Link Preview</name>
+	<description>
+		Offers a field that will place a link to the frontend in the publish pages
+	</description>
+	<repo type="github">https://github.com/DeuxHuitHuit/link_preview</repo>
+	<url type="discuss">https://github.com/DeuxHuitHuit/link_preview/issues</url>
+	<types>
+		<type>Field</type>
+		<type>Preview</type>
+	</types>
+	<authors>
+		<author>
+			<name github="DeuxHuitHuit" symphony="nitriques" twitter="DeuxHuitHuit">Deux Huit Huit</name>
+			<website>http://deuxhuithuit.com/</website>
+		</author>
+	</authors>
+	<dependencies>
+		<!-- None -->
+	</dependencies>
+	<releases>
+		<release version="1.0" date="2013-10-07" min="2.3.1">
+			- First release
+		</release>
+	</releases>
+</extension>
