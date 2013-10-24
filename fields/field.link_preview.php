@@ -259,6 +259,9 @@
 								break;
 							default:
 								$value = $fieldValues['handle'];
+								if (empty($value)) {
+									$value = $fieldValues['value'];
+								}
 								break;
 						}
 						
