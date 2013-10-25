@@ -291,7 +291,7 @@
 			parent::displaySettingsPanel($wrapper, $errors);
 
 			$handles_wrap = new XMLElement('div', NULL, array('class' => 'link_preview'));
-			$handles_wrap->appendChild( $this->createInput('Enter the url format <i>Use ${param} syntax</i>', 'format', $errors) );
+			$handles_wrap->appendChild( $this->createInput('Enter the url format <i>Use {$param} syntax</i>', 'format', $errors) );
 			$wrapper->appendChild($handles_wrap);
 			$this->appendShowColumnCheckbox($wrapper);
 		}
