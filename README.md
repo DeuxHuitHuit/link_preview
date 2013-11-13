@@ -11,7 +11,9 @@ Usign the brackets syntax, it permits to create frontend links related to the en
 ### REQUIREMENTS ###
 
 - Symphony CMS version 2.3.4 and up (as of the day of the last release of this extension)
-- You also need this pull request <https://github.com/symphonycms/symphony-2/pull/1836>
+- You also need those pull requests
+	- <https://github.com/symphonycms/symphony-2/pull/1836>
+	- <https://github.com/symphonycms/symphony-2/pull/1866>
 
 ### INSTALLATION ###
 
