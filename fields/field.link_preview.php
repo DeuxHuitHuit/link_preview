@@ -188,7 +188,7 @@
 			//var_dump($data, $this->get());die;
 			
 			$format = $this->get('format');
-			$url = $this->generateUrlFromFormat($data['entry-id'], $format, $this->get('parent_section'));
+			$url = $this->generateUrlFromFormat($data['entry_id'], $format, $this->get('parent_section'));
 			
 			$wrapper->setAttribute('data-format', $format);
 			$wrapper->setAttribute('data-url', $url);
@@ -324,7 +324,7 @@
 		 * @return string - the html of the link
 		 */
 		public function prepareTableValue($data, XMLElement $link=NULL){
-			$url = $this->generateUrlFromFormat($data['entry-id'], $this->get('format'), $this->get('parent_section'));
+			$url = $this->generateUrlFromFormat($data['entry_id'], $this->get('format'), $this->get('parent_section'));
 			
 			// does this cell serve as a link ?
 			if (!$link){
