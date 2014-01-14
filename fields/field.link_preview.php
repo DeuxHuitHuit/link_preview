@@ -253,6 +253,18 @@
 						
 						// handle special cases
 						switch ($field->handle()) {
+							case 'selectbox_link':
+								$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
+								$relatedFields = $field->get('related_field_id');
+								$relatedData = $relatedEntry[0]->getData($relatedFields[0], false);
+								
+								//var_dump($relatedData, $fieldValues, $field->get());die;
+								$value = $relatedData['handle'];
+								if (empty($value)) {
+									$value = $relatedData['value'];
+								}
+								break;
+								
 							case 'date':
 							case 'datetime':
 								$value = DateTimeObj::format($fieldValues['start'], $qualifier);
