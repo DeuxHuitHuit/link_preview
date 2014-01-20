@@ -2,7 +2,7 @@
 
 Version: 1.0
 
-## Offers a field that will place a link to the frontend in the publish pages ##
+## Offers a field that will place a link to the frontend in the publish pages
 
 ### SPECS ###
 
@@ -11,9 +11,6 @@ Usign the brackets syntax, it permits to create frontend links related to the en
 ### REQUIREMENTS ###
 
 - Symphony CMS version 2.3.4 and up (as of the day of the last release of this extension)
-- You also need those pull requests
-	- <https://github.com/symphonycms/symphony-2/pull/1836>
-	- <https://github.com/symphonycms/symphony-2/pull/1866>
 
 ### INSTALLATION ###
 

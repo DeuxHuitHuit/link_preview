@@ -80,7 +80,7 @@
 		 * @param $message
 		 * @param $entry_id
 		 */
-		public function checkPostFieldData($data, &$message, $entry_id=NULL){
+		public function checkPostFieldData($data, &$message, $entry_id = null){
 			// Always valid!
 			$message = NULL;
 			return self::__OK__;
@@ -184,11 +184,11 @@
 		 * @param string $fieldnamePrefix
 		 * @param string $fieldnamePostfix
 		 */
-		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL) {
+		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL, $entry_id = null) {
 			//var_dump($data, $this->get());die;
 			
 			$format = $this->get('format');
-			$url = $this->generateUrlFromFormat($data['entry_id'], $format, $this->get('parent_section'));
+			$url = $this->generateUrlFromFormat($entry_id, $format, $this->get('parent_section'));
 			
 			$wrapper->setAttribute('data-format', $format);
 			$wrapper->setAttribute('data-url', $url);
@@ -335,8 +335,8 @@
 		 * @param XMLElement $link
 		 * @return string - the html of the link
 		 */
-		public function prepareTableValue($data, XMLElement $link=NULL){
-			$url = $this->generateUrlFromFormat($data['entry_id'], $this->get('format'), $this->get('parent_section'));
+		public function prepareTableValue($data, XMLElement $link = null, $entry_id = null){
+			$url = $this->generateUrlFromFormat($entry_id, $this->get('format'), $this->get('parent_section'));
 			
 			// does this cell serve as a link ?
 			if (!$link){
@@ -351,18 +351,8 @@
 			
 			return $link->generate();
 		}
-
-		/**
-		 *
-		 * Return a plain text representation of the field's data
-		 * @param array $data
-		 * @param int $entry_id
-		 */
-		public function preparePlainTextValue($data, $entry_id = null) {
-			return $this->generateUrlFromFormat($entry_id, $this->get('format'), $this->get('parent_section'));
-		}
-
-
+		
+		
 		/**
 		 *
 		 * This function allows Fields to cleanup any additional things before it is removed
@@ -373,10 +363,10 @@
 			// @TODO
 			return false;
 		}
-
-
+		
+		
 		/* ********* SQL Data Definition ************* */
-
+		
 		/**
 		 *
 		 * Creates table needed for entries of invidual fields
@@ -385,14 +375,14 @@
 			// no table is needed for entries
 			return true;
 		}
-
+		
 		/**
 		 * Creates the table needed for the settings of the field
 		 */
 		public static function createFieldTable() {
-
+			
 			$tbl = self::FIELD_TBL_NAME;
-
+			
 			return Symphony::Database()->query("
 				CREATE TABLE IF NOT EXISTS `$tbl` (
 					`id` 				int(11) unsigned NOT NULL auto_increment,
