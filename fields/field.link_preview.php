@@ -155,7 +155,9 @@
 			return FieldManager::saveSettings( $id, $settings);
 		}
 
-
+		public function entryDataCleanup($entry_id, $data=NULL){
+			// do nothing since we do not have any data table
+		}
 
 
 		/* ******* DATA SOURCE ******* */
