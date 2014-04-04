@@ -69,24 +69,24 @@
 				return;
 			}
 		}
-
-
-		/* ********* INSTALL/UPDATE/UNISTALL ******* */
-
+		
+		
+		/* ********* INSTALL/UPDATE/UNINSTALL ******* */
+		
 		/**
 		 * Creates the table needed for the settings of the field
 		 */
 		public function install() {
 			return FieldLink_Preview::createFieldTable();
 		}
-
+		
 		/**
 		 * Creates the table needed for the settings of the field
 		 */
 		public function update($previousVersion) {
 			return true;
 		}
-
+		
 		/**
 		 *
 		 * Drops the table needed for the settings of the field
