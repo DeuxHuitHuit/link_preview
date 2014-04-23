@@ -20,6 +20,9 @@
 		<!-- None -->
 	</dependencies>
 	<releases>
+		<release version="1.1" date="2014-04-23" min="2.3.4" max="2.3.6">
+			- Added the ability to qualify fields in order to use their value instead of the handle
+		</release>
 		<release version="1.0" date="2014-01-20" min="2.3.4">
 			- First release
 		</release>

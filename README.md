@@ -1,6 +1,6 @@
 # Link Preview #
 
-Version: 1.0
+Version: 1.1
 
 ## Offers a field that will place a link to the frontend in the publish pages
 
@@ -27,10 +27,11 @@ Come say hi! -> <http://www.deuxhuithuit.com/>
 ### HOW TO USE ###
 
 - Add a Link Preview field to your section.
-- Set up the url format usign values from other fields.
+- Set up the url format using values from other fields.
 - A simple link will be added next to the title of the entry.
-	- You can format date and datetime fields usign qualifier for php date_format.
+	- You can format date and datetime fields using qualifier for php date_format.
 	i.e. /article/{$date:Y}/{$date:m}/{$date:d}/{$title}/
+- You can force the usage of the value instead of the handle by using the :value qualifier
 
 ### LICENSE ###
 
