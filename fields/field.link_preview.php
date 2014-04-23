@@ -262,7 +262,7 @@
 								
 								//var_dump($relatedData, $fieldValues, $field->get());die;
 								$value = $relatedData['handle'];
-								if (empty($value)) {
+								if (empty($value) || $qualifier == 'value') {
 									$value = $relatedData['value'];
 								}
 								break;
@@ -273,7 +273,7 @@
 								break;
 							default:
 								$value = $fieldValues['handle'];
-								if (empty($value)) {
+								if (empty($value) || $qualifier == 'value') {
 									$value = $fieldValues['value'];
 								}
 								break;
