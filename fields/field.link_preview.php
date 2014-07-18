@@ -349,7 +349,7 @@
 				$link->setAttribute('target', '_blank');
 			}
 			
-			$link->setValue($url);
+			$link->setValue($this->get('label'));
 			
 			return $link->generate();
 		}
