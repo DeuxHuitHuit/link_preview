@@ -84,6 +84,18 @@
 		 * Creates the table needed for the settings of the field
 		 */
 		public function update($previousVersion) {
+		
+			$ret = true;
+
+			// are we updating from lower than 1.2 ?
+			if ($ret && version_compare($previousVersion,'1.2') < 0) {
+				// update for the `anchor label` and `display url` settings
+				$ret_anchor = FieldLink_Preview::updateFieldTable_AnchorLabel();
+				$ret_display = FieldLink_Preview::updateFieldTable_DisplayUrl();
+				// set the return value
+				$ret = $ret_anchor && $ret_display;
+			}
+			
 			return true;
 		}
 		
