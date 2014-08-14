@@ -6,7 +6,7 @@ Version: 1.2
 
 ### SPECS ###
 
-Usign the brackets syntax, it permits to create frontend links related to the entry.
+Using the brackets syntax, it permits to create frontend links related to the entry.
 
 ### REQUIREMENTS ###
 
