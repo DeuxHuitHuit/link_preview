@@ -207,8 +207,9 @@
 			$wrapper->setAttribute('data-text', $label);
 		}
 		
-		private function getSystemData() {
+		private function getSystemData($entryId) {
 			return array(
+				'id' => $entryId,
 				'system:time' => DateTimeObj::format('now','H:i'),
 				'system:date' => DateTimeObj::format('now', 'Y-m-d'),
 				'system:day' => DateTimeObj::format('now','d'),
@@ -229,7 +230,7 @@
 			}
 			
 			// capture system params
-			$sysData = $this->getSystemData();
+			$sysData = $this->getSystemData($entryId);
 			
 			// get the actual data
 			$entryData = $entryData[0]->getData(null, false);
