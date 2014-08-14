@@ -1,6 +1,6 @@
 # Link Preview #
 
-Version: 1.1
+Version: 1.2
 
 ## Offers a field that will place a link to the frontend in the publish pages
 
@@ -28,10 +28,16 @@ Come say hi! -> <http://www.deuxhuithuit.com/>
 
 - Add a Link Preview field to your section.
 - Set up the url format using values from other fields.
+- Use "Anchor Label" to give your link a custom label.
 - A simple link will be added next to the title of the entry.
-	- You can format date and datetime fields using qualifier for php date_format.
-	i.e. /article/{$date:Y}/{$date:m}/{$date:d}/{$title}/
-- You can force the usage of the value instead of the handle by using the :value qualifier
+
+### HOW TO SET UP THE URL FORMAT ###
+
+- Use {$fieldname} to include the handle of a field
+- Use {$fieldname:value} to include the value instead of the handle
+- Use {$id} to include the id of an entry
+- Use qualifiers for php date_format to format date and datetime fields:
+	- i.e. /article/{$date:Y}/{$date:m}/{$date:d}/{$title}/
 
 ### LICENSE ###
 
