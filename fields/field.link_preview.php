@@ -209,7 +209,7 @@
 		
 		private function getSystemData($entryId) {
 			return array(
-				'id' => $entryId,
+				'system:id' => $entryId,
 				'system:time' => DateTimeObj::format('now','H:i'),
 				'system:date' => DateTimeObj::format('now', 'Y-m-d'),
 				'system:day' => DateTimeObj::format('now','d'),
@@ -235,68 +235,86 @@
 			// get the actual data
 			$entryData = $entryData[0]->getData(null, false);
 			
-			//var_dump($entryData, $format); die;
-			
 			// find all "variables" and replace them
 			return preg_replace_callback('({\$([a-zA-Z0-9:_-]+)})', function (array $matches) use ($sysData, $entryData, $fields) {
 				//var_dump($matches);
 				$variable = $matches[1];
 				$value = '';
 				$qualifier = '';
-				
+								
 				//var_dump($matches);die;
 				//var_dump($fields); die;
-				//var_dump($sysData, $entryData);die;
-				
-				// check variable for quilifier
-				if (strpos($variable, ':') !== FALSE) {
-					$variable = preg_split('[:]', $variable);
-					$qualifier = $variable[1];
-					$variable = $variable[0];
-					//var_dump($variable, $qualifier);
+				//var_dump($sysData, $entryData);die
+					
+				// check variable for namescape and qualifier
+				if (strpos($variable, 'system:') !== FALSE) {
+					// case '$system:variable'
+					if (substr_count($variable, ':') == 1) {
+						$value = $sysData[$variable];
+					// case '$system:variable:qualifier"
+					} else {
+						$fragments = explode(':',$variable,3);
+						$variable = $fragments[1];
+						$qualifier = $fragments[2];
+						switch ($variable) {
+							// format system dates
+							case 'date':
+								$value = DateTimeObj::format('now',$qualifier);
+								break;
+							// ... other system data?
+						}
+					}
+				// case '$variable:qualifier'	
+				} else if (strpos($variable, ':') !== FALSE) {
+					$fragments = preg_split('[:]', $variable);
+					$qualifier = $fragments[1];
+					$variable = $fragments[0];
 				}
 				
-				// find value by handle
-				foreach ($fields as $field) {
-					if ($field->get('element_name') == $variable) {
-						$fieldValues = $entryData[intval($field->get('field_id'))];
-						
-						//var_dump($fieldValues);
-						//var_dump($field->handle());
-						
-						// handle special cases
-						switch ($field->handle()) {
-							case 'selectbox_link':
-								$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
-								$relatedFields = $field->get('related_field_id');
-								$relatedData = $relatedEntry[0]->getData($relatedFields[0], false);
-								
-								//var_dump($relatedData, $fieldValues, $field->get());die;
-								$value = $relatedData['handle'];
-								if (empty($value) || $qualifier == 'value') {
-									$value = $relatedData['value'];
-								}
-								break;
-								
-							case 'date':
-							case 'datetime':
-								$value = DateTimeObj::format($fieldValues['start'], $qualifier);
-								break;
-							default:
-								$value = $fieldValues['handle'];
-								if (empty($value) || $qualifier == 'value') {
-									$value = $fieldValues['value'];
-								}
-								break;
+				// check fields if no value is set yet
+				if (strlen($value) < 1) {
+					// find value by handle
+					foreach ($fields as $field) {
+						if ($field->get('element_name') == $variable) {
+							$fieldValues = $entryData[intval($field->get('field_id'))];
+							
+							//var_dump($fieldValues);
+							//var_dump($field->handle());
+							
+							// handle special cases
+							switch ($field->handle()) {
+								case 'selectbox_link':
+									$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
+									$relatedFields = $field->get('related_field_id');
+									$relatedData = $relatedEntry[0]->getData($relatedFields[0], false);
+									
+									//var_dump($relatedData, $fieldValues, $field->get());die;
+									$value = $relatedData['handle'];
+									if (empty($value) || $qualifier == 'value') {
+										$value = $relatedData['value'];
+									}
+									break;
+								case 'date':
+									$value = DateTimeObj::format($fieldValues['value'], $qualifier);
+									break;
+								case 'datetime':
+									$value = DateTimeObj::format($fieldValues['start'], $qualifier);
+									break;
+								default:
+									$value = $fieldValues['handle'];
+									if (empty($value) || $qualifier == 'value') {
+										$value = $fieldValues['value'];
+									}
+									break;
+							}
+							break;
 						}
-						
-						break;
 					}
 				}
 				
-				// if nothing was found, revert to SYSTEM_DATA
-				if (strlen($value) < 1) {
-					$value = $sysData[$variable];
+				// Shortcut for entry ID (only used if no value was found for a field that might use the 'id'-handle)
+				if (strlen($value) < 1 && $variable == 'id') {
+					$value = $sysData['system:'.$variable];
 				}
 				
 				return $value;
@@ -356,6 +374,7 @@
 			
 			$wrapper->appendChild($label);
 		}
+		
 		
 		private function createInput($text, $key, $errors=NULL) {
 			$order = $this->get('sortorder');
@@ -495,3 +514,4 @@
 		}
 
 	}
+
