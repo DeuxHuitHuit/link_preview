@@ -33,13 +33,13 @@ Come say hi! -> <http://www.deuxhuithuit.com/>
 
 ### HOW TO SET UP THE URL FORMAT ###
 
-- Use {$fieldname} to include the handle of a field
-- Use {$fieldname:value} to include the value instead of the handle
-- Use {$system:id} to include the id of an entry
+- Use `{$fieldname}` to include the handle of a field
+- Use `{$fieldname:value}` to include the value instead of the handle
+- Use `{$system:id}` to include the id of an entry
 - Use qualifiers for php date_format to format date and datetime fields:
-	- i.e. /article/{$date:Y}/{$date:m}/{$date:d}/{$title}/
+	- i.e. /article/`{$date:Y}`/`{$date:m}`/`{$date:d}`/`{$title}`/
 - Use qualifiers for php date_format to format the current system date:
-	- i.e. /today/{$system:date:Y}/{$system:date:m}/{$system:date:d}/
+	- i.e. /today/`{$system:date:Y}`/`{$system:date:m}`/`{$system:date:d}`/
 
 
 ### LICENSE ###
