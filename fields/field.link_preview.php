@@ -346,7 +346,7 @@
 			$url_wrap->appendChild($url_title);
 			
 			/* new line, check boxes */
-			$chk_wrap = new XMLElement('div', NULL, array('class' => 'compact'));
+			$chk_wrap = new XMLElement('div', NULL, array('class' => 'two columns'));
 			$this->appendShowColumnCheckbox($chk_wrap);
 			$this->appendDisplayUrlCheckbox($chk_wrap);
 			
@@ -362,7 +362,7 @@
 		 * @param XMLElement $wrapper
 		 */
 		private function appendDisplayUrlCheckbox(&$wrapper) {
-			$label = new XMLElement('label');
+			$label = new XMLElement('label', NULL, array('class' => 'column'));
 			$chk = new XMLElement('input', NULL, array('name' => 'fields['.$this->get('sortorder').'][display_url]', 'type' => 'checkbox', 'value' => 'yes'));
 			
 			$label->appendChild($chk);
