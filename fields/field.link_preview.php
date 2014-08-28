@@ -150,6 +150,12 @@
 
 			// the url format
 			$settings['format'] = $this->get('format');
+			
+			// the anchor label
+			$settings['anchor_label'] = $this->get('anchor_label');
+			
+			// display url
+			$settings['display_url'] = $this->get('display_url') == 'yes' ? 'yes' : 'no';
 
 			// officialy save it
 			return FieldManager::saveSettings( $id, $settings);
@@ -191,14 +197,19 @@
 			
 			$format = $this->get('format');
 			$url = $this->generateUrlFromFormat($entry_id, $format, $this->get('parent_section'));
+			$anchor_label = $this->get('anchor_label');
+			
+			// set the label : use `preview` if no ànchor label` is defined
+			$label = $anchor_label != '' ? $anchor_label : __('Preview');
 			
 			$wrapper->setAttribute('data-format', $format);
 			$wrapper->setAttribute('data-url', $url);
-			$wrapper->setAttribute('data-text', __('Preview'));
+			$wrapper->setAttribute('data-text', $label);
 		}
 		
-		private function getSystemData() {
+		private function getSystemData($entryId) {
 			return array(
+				'system:id' => $entryId,
 				'system:time' => DateTimeObj::format('now','H:i'),
 				'system:date' => DateTimeObj::format('now', 'Y-m-d'),
 				'system:day' => DateTimeObj::format('now','d'),
@@ -219,12 +230,10 @@
 			}
 			
 			// capture system params
-			$sysData = $this->getSystemData();
+			$sysData = $this->getSystemData($entryId);
 			
 			// get the actual data
 			$entryData = $entryData[0]->getData(null, false);
-			
-			//var_dump($entryData, $format); die;
 			
 			// find all "variables" and replace them
 			return preg_replace_callback('({\$([a-zA-Z0-9:_-]+)})', function (array $matches) use ($sysData, $entryData, $fields) {
@@ -232,60 +241,80 @@
 				$variable = $matches[1];
 				$value = '';
 				$qualifier = '';
-				
+								
 				//var_dump($matches);die;
 				//var_dump($fields); die;
-				//var_dump($sysData, $entryData);die;
-				
-				// check variable for quilifier
-				if (strpos($variable, ':') !== FALSE) {
-					$variable = preg_split('[:]', $variable);
-					$qualifier = $variable[1];
-					$variable = $variable[0];
-					//var_dump($variable, $qualifier);
+				//var_dump($sysData, $entryData);die
+					
+				// check variable for namescape and qualifier
+				if (strpos($variable, 'system:') !== FALSE) {
+					// case '$system:variable'
+					if (substr_count($variable, ':') == 1) {
+						$value = $sysData[$variable];
+					// case '$system:variable:qualifier"
+					} else {
+						$fragments = explode(':',$variable,3);
+						$variable = $fragments[1];
+						$qualifier = $fragments[2];
+						switch ($variable) {
+							// format system dates
+							case 'date':
+								$value = DateTimeObj::format('now',$qualifier);
+								break;
+							// ... other system data?
+						}
+					}
+				// case '$variable:qualifier'	
+				} else if (strpos($variable, ':') !== FALSE) {
+					$fragments = preg_split('[:]', $variable);
+					$qualifier = $fragments[1];
+					$variable = $fragments[0];
 				}
 				
-				// find value by handle
-				foreach ($fields as $field) {
-					if ($field->get('element_name') == $variable) {
-						$fieldValues = $entryData[intval($field->get('field_id'))];
-						
-						//var_dump($fieldValues);
-						//var_dump($field->handle());
-						
-						// handle special cases
-						switch ($field->handle()) {
-							case 'selectbox_link':
-								$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
-								$relatedFields = $field->get('related_field_id');
-								$relatedData = $relatedEntry[0]->getData($relatedFields[0], false);
-								
-								//var_dump($relatedData, $fieldValues, $field->get());die;
-								$value = $relatedData['handle'];
-								if (empty($value) || $qualifier == 'value') {
-									$value = $relatedData['value'];
-								}
-								break;
-								
-							case 'date':
-							case 'datetime':
-								$value = DateTimeObj::format($fieldValues['start'], $qualifier);
-								break;
-							default:
-								$value = $fieldValues['handle'];
-								if (empty($value) || $qualifier == 'value') {
-									$value = $fieldValues['value'];
-								}
-								break;
+				// check fields if no value is set yet
+				if (strlen($value) < 1) {
+					// find value by handle
+					foreach ($fields as $field) {
+						if ($field->get('element_name') == $variable) {
+							$fieldValues = $entryData[intval($field->get('field_id'))];
+							
+							//var_dump($fieldValues);
+							//var_dump($field->handle());
+							
+							// handle special cases
+							switch ($field->handle()) {
+								case 'selectbox_link':
+									$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
+									$relatedFields = $field->get('related_field_id');
+									$relatedData = $relatedEntry[0]->getData($relatedFields[0], false);
+									
+									//var_dump($relatedData, $fieldValues, $field->get());die;
+									$value = $relatedData['handle'];
+									if (empty($value) || $qualifier == 'value') {
+										$value = $relatedData['value'];
+									}
+									break;
+								case 'date':
+									$value = DateTimeObj::format($fieldValues['value'], $qualifier);
+									break;
+								case 'datetime':
+									$value = DateTimeObj::format($fieldValues['start'], $qualifier);
+									break;
+								default:
+									$value = $fieldValues['handle'];
+									if (empty($value) || $qualifier == 'value') {
+										$value = $fieldValues['value'];
+									}
+									break;
+							}
+							break;
 						}
-						
-						break;
 					}
 				}
 				
-				// if nothing was found, revert to SYSTEM_DATA
-				if (strlen($value) < 1) {
-					$value = $sysData[$variable];
+				// Shortcut for entry ID (only used if no value was found for a field that might use the 'id'-handle)
+				if (strlen($value) < 1 && $variable == 'id') {
+					$value = $sysData['system:'.$variable];
 				}
 				
 				return $value;
@@ -303,12 +332,49 @@
 
 			/* first line, label and such */
 			parent::displaySettingsPanel($wrapper, $errors);
-
-			$handles_wrap = new XMLElement('div', NULL, array('class' => 'link_preview'));
-			$handles_wrap->appendChild( $this->createInput('Enter the url format <i>Use {$param} syntax</i>', 'format', $errors) );
-			$wrapper->appendChild($handles_wrap);
-			$this->appendShowColumnCheckbox($wrapper);
+			
+			/* new line, anchor label */
+			$anchor_wrap = new XMLElement('div', NULL, array('class'=>'link_preview_anchor'));
+			$anchor_title = new XMLElement('label', __('Anchor Label <i>Optional</i>'));
+			$anchor_title->appendChild(Widget::Input('fields['.$this->get('sortorder').'][anchor_label]', $this->get('anchor_label')));
+			$anchor_wrap->appendChild($anchor_title);
+			
+			/* new line, url format */
+			$url_wrap = new XMLElement('div', NULL, array('class'=>'link_preview_url'));
+			$url_title = new XMLElement('label', __('URL Format <i>Use {$param} syntax</i>'));
+			$url_title->appendChild(Widget::Input('fields['.$this->get('sortorder').'][format]', $this->get('format')));
+			$url_wrap->appendChild($url_title);
+			
+			/* new line, check boxes */
+			$chk_wrap = new XMLElement('div', NULL, array('class' => 'two columns'));
+			$this->appendShowColumnCheckbox($chk_wrap);
+			$this->appendDisplayUrlCheckbox($chk_wrap);
+			
+			$wrapper->appendChild($anchor_wrap);
+			$wrapper->appendChild($url_wrap);
+			$wrapper->appendChild($chk_wrap);
 		}
+		
+		
+		/**
+		 *
+		 * Utility (private) function to append a checkbox for the 'display url' setting
+		 * @param XMLElement $wrapper
+		 */
+		private function appendDisplayUrlCheckbox(&$wrapper) {
+			$label = new XMLElement('label', NULL, array('class' => 'column'));
+			$chk = new XMLElement('input', NULL, array('name' => 'fields['.$this->get('sortorder').'][display_url]', 'type' => 'checkbox', 'value' => 'yes'));
+			
+			$label->appendChild($chk);
+			$label->setValue(__('Display URL in entries table (Instead of anchor label)'), false);
+
+			if ($this->get('display_url') == 'yes') {
+				$chk->setAttribute('checked','checked');
+			}
+			
+			$wrapper->appendChild($label);
+		}
+		
 		
 		private function createInput($text, $key, $errors=NULL) {
 			$order = $this->get('sortorder');
@@ -349,7 +415,17 @@
 				$link->setAttribute('target', '_blank');
 			}
 			
-			$link->setValue($this->get('label'));
+			$display_url = $this->get('display_url');
+			$anchor_label = $this->get('anchor_label');
+			
+			// set the label
+			if ($display_url == 'yes') {
+				$link->setValue($url);
+			} else if ($anchor_label) {
+				$link->setValue($anchor_label);
+			} else {
+				$link->setValue($this->get('label'));
+			}
 			
 			return $link->generate();
 		}
@@ -388,11 +464,39 @@
 			return Symphony::Database()->query("
 				CREATE TABLE IF NOT EXISTS `$tbl` (
 					`id` 				int(11) unsigned NOT NULL auto_increment,
-					`field_id` 			int(11) unsigned NOT NULL,
+					`field_id` 		int(11) unsigned NOT NULL,
 					`format`			varchar(255) NULL,
+					`anchor_label` varchar(255) NULL,
+					`display_url`	ENUM('yes', 'no') DEFAULT 'no',
 					PRIMARY KEY (`id`),
 					KEY `field_id` (`field_id`)
 				)  ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+			");
+		}
+		
+		/**
+		 * Updates the table for the new settings: `anchor_label`
+		 */
+		public static function updateFieldTable_AnchorLabel() {
+
+			$tbl = self::FIELD_TBL_NAME;
+
+			return Symphony::Database()->query("
+				ALTER TABLE  `$tbl`
+					ADD COLUMN `anchor_label` varchar(255) NULL
+			");
+		}
+		
+		/**
+		 * Updates the table for the new settings: `display_url`
+		 */
+		public static function updateFieldTable_DisplayUrl() {
+
+			$tbl = self::FIELD_TBL_NAME;
+
+			return Symphony::Database()->query("
+				ALTER TABLE  `$tbl`
+					ADD COLUMN `display_url` ENUM('yes','no') DEFAULT 'no'
 			");
 		}
 
@@ -410,3 +514,4 @@
 		}
 
 	}
+
