@@ -35,9 +35,12 @@ Come say hi! -> <http://www.deuxhuithuit.com/>
 
 - Use {$fieldname} to include the handle of a field
 - Use {$fieldname:value} to include the value instead of the handle
-- Use {$id} to include the id of an entry
+- Use {$system:id} to include the id of an entry
 - Use qualifiers for php date_format to format date and datetime fields:
 	- i.e. /article/{$date:Y}/{$date:m}/{$date:d}/{$title}/
+- Use qualifiers for php date_format to format the current system date:
+	- i.e. /today/{$system:date:Y}/{$system:date:m}/{$system:date:d}/
+
 
 ### LICENSE ###
 
