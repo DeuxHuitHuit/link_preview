@@ -329,29 +329,32 @@
 		 * @param array $errors
 		 */
 		public function displaySettingsPanel(&$wrapper, $errors=NULL){
-
 			/* first line, label and such */
 			parent::displaySettingsPanel($wrapper, $errors);
 			
-			/* new line, anchor label */
-			$anchor_wrap = new XMLElement('div', NULL, array('class'=>'link_preview_anchor'));
-			$anchor_title = new XMLElement('label', __('Anchor Label <i>Optional</i>'));
-			$anchor_title->appendChild(Widget::Input('fields['.$this->get('sortorder').'][anchor_label]', $this->get('anchor_label')));
-			$anchor_wrap->appendChild($anchor_title);
+			/* new line */
+			$opts_wrap = new XMLElement('div', NULL, array('class' => 'two columns'));
 			
-			/* new line, url format */
-			$url_wrap = new XMLElement('div', NULL, array('class'=>'link_preview_url'));
+			/* url format */
+			$url_wrap = new XMLElement('div', NULL, array('class' => 'column link_preview_url'));
 			$url_title = new XMLElement('label', __('URL Format <i>Use {$param} syntax</i>'));
 			$url_title->appendChild(Widget::Input('fields['.$this->get('sortorder').'][format]', $this->get('format')));
 			$url_wrap->appendChild($url_title);
+			$opts_wrap->appendChild($url_wrap);
+			
+			/* anchor label */
+			$anchor_wrap = new XMLElement('div', NULL, array('class' => 'column link_preview_anchor'));
+			$anchor_title = new XMLElement('label', __('Anchor Label <i>Optional, Use {$param} syntax, Defaults to the url</i>'));
+			$anchor_title->appendChild(Widget::Input('fields['.$this->get('sortorder').'][anchor_label]', $this->get('anchor_label')));
+			$anchor_wrap->appendChild($anchor_title);
+			$opts_wrap->appendChild($anchor_wrap);
 			
 			/* new line, check boxes */
 			$chk_wrap = new XMLElement('div', NULL, array('class' => 'two columns'));
 			$this->appendShowColumnCheckbox($chk_wrap);
 			$this->appendDisplayUrlCheckbox($chk_wrap);
 			
-			$wrapper->appendChild($anchor_wrap);
-			$wrapper->appendChild($url_wrap);
+			$wrapper->appendChild($opts_wrap);
 			$wrapper->appendChild($chk_wrap);
 		}
 		
@@ -385,13 +388,13 @@
 					'name' => "fields[$order][$key]"
 			));
 			$input->setSelfClosingTag(true);
-		
+			
 			$lbl->prependChild($input);
-		
+			
 			if (isset($errors[$key])) {
 				$lbl = Widget::wrapFormElementWithError($lbl, $errors[$key]);
 			}
-		
+			
 			return $lbl;
 		}
 
