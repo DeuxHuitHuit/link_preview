@@ -33,11 +33,20 @@ For more information, see <http://getsymphony.com/learn/tasks/view/install-an-ex
 
 - Use `{$fieldname}` to include the handle of a field
 - Use `{$fieldname:value}` to include the value instead of the handle
-- Use `{$system:id}` to include the id of an entry
 - Use qualifiers for php date_format to format date and datetime fields:
 	- i.e. /article/`{$date:Y}`/`{$date:m}`/`{$date:d}`/`{$title}`/
 - Use qualifiers for php date_format to format the current system date:
 	- i.e. /today/`{$system:date:Y}`/`{$system:date:m}`/`{$system:date:d}`/
+- Available system values:
+	- `system:id` => Entry ID
+	- `system:time` => 'H:i'
+	- `system:date` => 'Y-m-d'
+	- `system:day` => 'd'
+	- `system:month` => 'm',
+	- `system:year` => 'Y',
+	- `system:root` => URL,
+	- `system:workspace` => URL . '/workspace',
+	- `system:http-host` => HTTP_HOST,
 
 
 ### LICENSE ###
