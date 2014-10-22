@@ -274,9 +274,9 @@
 				// check fields if no value is set yet
 				if (strlen($value) < 1) {
 					// find value by handle
-					foreach ($fields as $field) {
+					foreach ($fields as $fieldId => $field) {
 						if ($field->get('element_name') == $variable) {
-							$fieldValues = $entryData[intval($field->get('field_id'))];
+							$fieldValues = $entryData[$fieldId];
 							
 							//var_dump($fieldValues);
 							//var_dump($field->handle());
