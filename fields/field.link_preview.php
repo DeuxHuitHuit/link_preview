@@ -193,11 +193,10 @@
 		 * @param string $fieldnamePostfix
 		 */
 		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL, $entry_id = null) {
-			//var_dump($data, $this->get());die;
-			
+			$sectionId = $this->get('parent_section');
 			$format = $this->get('format');
-			$url = $this->applyFormat($entry_id, $format, $this->get('parent_section'));
-			$anchor_label = $this->get('anchor_label');
+			$url = $this->applyFormat($entry_id, $format, $sectionId);
+			$anchor_label = $this->applyFormat($entry_id, $this->get('anchor_label'), $sectionId);
 			
 			// set the label : use `preview` if no ànchor label` is defined
 			$label = $anchor_label != '' ? $anchor_label : __('Preview');
