@@ -13,14 +13,14 @@
 	<authors>
 		<author>
 			<name github="DeuxHuitHuit" symphony="nitriques" twitter="DeuxHuitHuit">Deux Huit Huit</name>
-			<website>http://deuxhuithuit.com/</website>
+			<website>https://deuxhuithuit.com/</website>
 		</author>
 	</authors>
 	<dependencies>
 		<!-- None -->
 	</dependencies>
 	<releases>
-		<release version="1.2" date="2014-08-14" min="2.3.4" max="2.5">
+		<release version="1.2" date="2014-10-22" min="2.3.4" max="2.5.x">
 			- Added setting "anchor label" (displayed in the entries table and entry heading)
 			- Added setting "display url" (display url in entries table instead of the anchor label)
 			- Made entry id accessible for url formatting via {$id}
