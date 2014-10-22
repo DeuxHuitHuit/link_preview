@@ -214,6 +214,9 @@
 				'system:day' => DateTimeObj::format('now','d'),
 				'system:month' => DateTimeObj::format('now','m'),
 				'system:year' => DateTimeObj::format('now','Y'),
+				'system:root' => URL,
+				'system:workspace' => URL . '/workspace',
+				'system:http-host' => HTTP_HOST,
 			);
 		}
 		
