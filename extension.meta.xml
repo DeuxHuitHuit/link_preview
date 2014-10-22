@@ -22,8 +22,10 @@
 	<releases>
 		<release version="1.2" date="2014-10-22" min="2.3.4" max="2.5.x">
 			- Added setting "anchor label" (displayed in the entries table and entry heading)
+			- Anchor label can also use the {$param} syntax.
 			- Added setting "display url" (display url in entries table instead of the anchor label)
-			- Made entry id accessible for url formatting via {$id}
+			- Made entry id accessible for url formatting via {$system:id}
+			- Added {$system:root}, {$system:workspace}, {$system:http-host} parameters
 		</release>
 		<release version="1.1" date="2014-04-23" min="2.3.4" max="2.3.6">
 			- Added the ability to qualify fields in order to use their value instead of the handle
