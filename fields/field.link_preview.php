@@ -196,7 +196,7 @@
 			//var_dump($data, $this->get());die;
 			
 			$format = $this->get('format');
-			$url = $this->generateUrlFromFormat($entry_id, $format, $this->get('parent_section'));
+			$url = $this->applyFormat($entry_id, $format, $this->get('parent_section'));
 			$anchor_label = $this->get('anchor_label');
 			
 			// set the label : use `preview` if no ànchor label` is defined
@@ -218,7 +218,7 @@
 			);
 		}
 		
-		private function generateUrlFromFormat($entryId, $format, $sectionId) {
+		private function applyFormat($entryId, $format, $sectionId) {
 			// Get all the data for this entry
 			$entryData = EntryManager::fetch($entryId);
 			// Get info for each field
@@ -226,7 +226,7 @@
 			$fields = $section->fetchFields();
 			
 			if (empty($entryData)) {
-				return 'Entry not found';
+				return __('Entry not found');
 			}
 			
 			// capture system params
@@ -235,36 +235,39 @@
 			// get the actual data
 			$entryData = $entryData[0]->getData(null, false);
 			
+			// cache ourself
+			$self = $this;
+			
 			// find all "variables" and replace them
-			return preg_replace_callback('({\$([a-zA-Z0-9:_-]+)})', function (array $matches) use ($sysData, $entryData, $fields) {
+			return preg_replace_callback('({\$([a-zA-Z0-9:_-]+)})', function (array $matches) use ($sysData, $entryData, $fields, $self) {
 				//var_dump($matches);
 				$variable = $matches[1];
 				$value = '';
 				$qualifier = '';
-								
+				
 				//var_dump($matches);die;
 				//var_dump($fields); die;
 				//var_dump($sysData, $entryData);die
-					
-				// check variable for namescape and qualifier
+				
+				// check variable for namespace and qualifier
 				if (strpos($variable, 'system:') !== FALSE) {
 					// case '$system:variable'
 					if (substr_count($variable, ':') == 1) {
 						$value = $sysData[$variable];
 					// case '$system:variable:qualifier"
 					} else {
-						$fragments = explode(':',$variable,3);
+						$fragments = explode(':', $variable, 3);
 						$variable = $fragments[1];
 						$qualifier = $fragments[2];
 						switch ($variable) {
 							// format system dates
 							case 'date':
-								$value = DateTimeObj::format('now',$qualifier);
+								$value = DateTimeObj::format('now', $qualifier);
 								break;
 							// ... other system data?
 						}
 					}
-				// case '$variable:qualifier'	
+				// case '$variable:qualifier'
 				} else if (strpos($variable, ':') !== FALSE) {
 					$fragments = preg_split('[:]', $variable);
 					$qualifier = $fragments[1];
@@ -276,37 +279,7 @@
 					// find value by handle
 					foreach ($fields as $fieldId => $field) {
 						if ($field->get('element_name') == $variable) {
-							$fieldValues = $entryData[$fieldId];
-							
-							//var_dump($fieldValues);
-							//var_dump($field->handle());
-							
-							// handle special cases
-							switch ($field->handle()) {
-								case 'selectbox_link':
-									$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
-									$relatedFields = $field->get('related_field_id');
-									$relatedData = $relatedEntry[0]->getData($relatedFields[0], false);
-									
-									//var_dump($relatedData, $fieldValues, $field->get());die;
-									$value = $relatedData['handle'];
-									if (empty($value) || $qualifier == 'value') {
-										$value = $relatedData['value'];
-									}
-									break;
-								case 'date':
-									$value = DateTimeObj::format($fieldValues['value'], $qualifier);
-									break;
-								case 'datetime':
-									$value = DateTimeObj::format($fieldValues['start'], $qualifier);
-									break;
-								default:
-									$value = $fieldValues['handle'];
-									if (empty($value) || $qualifier == 'value') {
-										$value = $fieldValues['value'];
-									}
-									break;
-							}
+							$value = $self::getFieldValue($field, $entryData[$fieldId], $qualifier);
 							break;
 						}
 					}
@@ -320,6 +293,40 @@
 				return $value;
 				
 			}, $format);
+		}
+
+		public static function getFieldValue($field, $fieldValues, $qualifier) {
+			//var_dump($fieldValues);
+			//var_dump($field->handle());
+			$value = '';
+			
+			// handle special cases
+			switch ($field->handle()) {
+				case 'selectbox_link':
+					$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
+					$relatedFields = $field->get('related_field_id');
+					$relatedData = $relatedEntry[0]->getData($relatedFields[0], false);
+					
+					//var_dump($relatedData, $fieldValues, $field->get());die;
+					$value = $relatedData['handle'];
+					if (empty($value) || $qualifier == 'value') {
+						$value = $relatedData['value'];
+					}
+					break;
+				case 'date':
+					$value = DateTimeObj::format($fieldValues['value'], $qualifier);
+					break;
+				case 'datetime':
+					$value = DateTimeObj::format($fieldValues['start'], $qualifier);
+					break;
+				default:
+					$value = $fieldValues['handle'];
+					if (empty($value) || $qualifier == 'value') {
+						$value = $fieldValues['value'];
+					}
+					break;
+			}
+			return $value;
 		}
 
 		/**
@@ -407,7 +414,8 @@
 		 * @return string - the html of the link
 		 */
 		public function prepareTableValue($data, XMLElement $link = null, $entry_id = null){
-			$url = $this->generateUrlFromFormat($entry_id, $this->get('format'), $this->get('parent_section'));
+			$sectionId = $this->get('parent_section');
+			$url = $this->applyFormat($entry_id, $this->get('format'), $sectionId);
 			
 			// does this cell serve as a link ?
 			if (!$link){
@@ -419,7 +427,7 @@
 			}
 			
 			$display_url = $this->get('display_url');
-			$anchor_label = $this->get('anchor_label');
+			$anchor_label = $this->applyFormat($entry_id, $this->get('anchor_label'), $sectionId);
 			
 			// set the label
 			if ($display_url == 'yes') {
