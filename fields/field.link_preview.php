@@ -227,7 +227,7 @@
 			$section = SectionManager::fetch($sectionId);
 			$fields = $section->fetchFields();
 			
-			if (empty($entryData)) {
+			if (!is_array($entryData) || empty($entryData)) {
 				return __('Entry not found');
 			}
 			
@@ -308,7 +308,9 @@
 					$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
 					$relatedFields = $field->get('related_field_id');
 					$relatedData = $relatedEntry[0]->getData($relatedFields[0], false);
-					
+					if (empty($relatedEntry) || empty($relatedFields)) {
+						continue;
+					}
 					//var_dump($relatedData, $fieldValues, $field->get());die;
 					$value = $relatedData['handle'];
 					if (empty($value) || $qualifier == 'value') {
