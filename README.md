@@ -2,7 +2,7 @@
 
 Version: 1.2
 
-## Offers a field that will place a link to the frontend in the publish pages
+> Offers a field that will place a link to the frontend in the publish pages
 
 ### SPECS ###
 
@@ -18,11 +18,9 @@ Using the brackets syntax, it permits to create frontend links related to the en
 - Put into the extension directory
 - Enable/install just like any other extension
 
-See <http://getsymphony.com/learn/tasks/view/install-an-extension/>
+You can also install it using the [extension downloader](http://symphonyextensions.com/extensions/extension_downloader/).
 
-*Voila !*
-
-Come say hi! -> <http://www.deuxhuithuit.com/>
+For more information, see <http://getsymphony.com/learn/tasks/view/install-an-extension/>
 
 ### HOW TO USE ###
 
@@ -35,13 +33,26 @@ Come say hi! -> <http://www.deuxhuithuit.com/>
 
 - Use `{$fieldname}` to include the handle of a field
 - Use `{$fieldname:value}` to include the value instead of the handle
-- Use `{$system:id}` to include the id of an entry
 - Use qualifiers for php date_format to format date and datetime fields:
 	- i.e. /article/`{$date:Y}`/`{$date:m}`/`{$date:d}`/`{$title}`/
 - Use qualifiers for php date_format to format the current system date:
 	- i.e. /today/`{$system:date:Y}`/`{$system:date:m}`/`{$system:date:d}`/
+- Available system values:
+	- `system:id` => Entry ID
+	- `system:time` => 'H:i'
+	- `system:date` => 'Y-m-d'
+	- `system:day` => 'd'
+	- `system:month` => 'm',
+	- `system:year` => 'Y',
+	- `system:root` => URL,
+	- `system:workspace` => URL . '/workspace',
+	- `system:http-host` => HTTP_HOST,
 
 
 ### LICENSE ###
 
 MIT <http://deuxhuithuit.mit-license.org>
+
+*Voila !*
+
+Come say hi! -> <http://www.deuxhuithuit.com/>

@@ -193,11 +193,10 @@
 		 * @param string $fieldnamePostfix
 		 */
 		public function displayPublishPanel(&$wrapper, $data=NULL, $flagWithError=NULL, $fieldnamePrefix=NULL, $fieldnamePostfix=NULL, $entry_id = null) {
-			//var_dump($data, $this->get());die;
-			
+			$sectionId = $this->get('parent_section');
 			$format = $this->get('format');
-			$url = $this->generateUrlFromFormat($entry_id, $format, $this->get('parent_section'));
-			$anchor_label = $this->get('anchor_label');
+			$url = $this->applyFormat($entry_id, $format, $sectionId);
+			$anchor_label = $this->applyFormat($entry_id, $this->get('anchor_label'), $sectionId);
 			
 			// set the label : use `preview` if no ànchor label` is defined
 			$label = $anchor_label != '' ? $anchor_label : __('Preview');
@@ -215,10 +214,13 @@
 				'system:day' => DateTimeObj::format('now','d'),
 				'system:month' => DateTimeObj::format('now','m'),
 				'system:year' => DateTimeObj::format('now','Y'),
+				'system:root' => URL,
+				'system:workspace' => URL . '/workspace',
+				'system:http-host' => HTTP_HOST,
 			);
 		}
 		
-		private function generateUrlFromFormat($entryId, $format, $sectionId) {
+		private function applyFormat($entryId, $format, $sectionId) {
 			// Get all the data for this entry
 			$entryData = EntryManager::fetch($entryId);
 			// Get info for each field
@@ -226,7 +228,7 @@
 			$fields = $section->fetchFields();
 			
 			if (empty($entryData)) {
-				return 'Entry not found';
+				return __('Entry not found');
 			}
 			
 			// capture system params
@@ -235,36 +237,39 @@
 			// get the actual data
 			$entryData = $entryData[0]->getData(null, false);
 			
+			// cache ourself
+			$self = $this;
+			
 			// find all "variables" and replace them
-			return preg_replace_callback('({\$([a-zA-Z0-9:_-]+)})', function (array $matches) use ($sysData, $entryData, $fields) {
+			return preg_replace_callback('({\$([a-zA-Z0-9:_-]+)})', function (array $matches) use ($sysData, $entryData, $fields, $self) {
 				//var_dump($matches);
 				$variable = $matches[1];
 				$value = '';
 				$qualifier = '';
-								
+				
 				//var_dump($matches);die;
 				//var_dump($fields); die;
 				//var_dump($sysData, $entryData);die
-					
-				// check variable for namescape and qualifier
+				
+				// check variable for namespace and qualifier
 				if (strpos($variable, 'system:') !== FALSE) {
 					// case '$system:variable'
 					if (substr_count($variable, ':') == 1) {
 						$value = $sysData[$variable];
 					// case '$system:variable:qualifier"
 					} else {
-						$fragments = explode(':',$variable,3);
+						$fragments = explode(':', $variable, 3);
 						$variable = $fragments[1];
 						$qualifier = $fragments[2];
 						switch ($variable) {
 							// format system dates
 							case 'date':
-								$value = DateTimeObj::format('now',$qualifier);
+								$value = DateTimeObj::format('now', $qualifier);
 								break;
 							// ... other system data?
 						}
 					}
-				// case '$variable:qualifier'	
+				// case '$variable:qualifier'
 				} else if (strpos($variable, ':') !== FALSE) {
 					$fragments = preg_split('[:]', $variable);
 					$qualifier = $fragments[1];
@@ -274,39 +279,9 @@
 				// check fields if no value is set yet
 				if (strlen($value) < 1) {
 					// find value by handle
-					foreach ($fields as $field) {
+					foreach ($fields as $fieldId => $field) {
 						if ($field->get('element_name') == $variable) {
-							$fieldValues = $entryData[intval($field->get('field_id'))];
-							
-							//var_dump($fieldValues);
-							//var_dump($field->handle());
-							
-							// handle special cases
-							switch ($field->handle()) {
-								case 'selectbox_link':
-									$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
-									$relatedFields = $field->get('related_field_id');
-									$relatedData = $relatedEntry[0]->getData($relatedFields[0], false);
-									
-									//var_dump($relatedData, $fieldValues, $field->get());die;
-									$value = $relatedData['handle'];
-									if (empty($value) || $qualifier == 'value') {
-										$value = $relatedData['value'];
-									}
-									break;
-								case 'date':
-									$value = DateTimeObj::format($fieldValues['value'], $qualifier);
-									break;
-								case 'datetime':
-									$value = DateTimeObj::format($fieldValues['start'], $qualifier);
-									break;
-								default:
-									$value = $fieldValues['handle'];
-									if (empty($value) || $qualifier == 'value') {
-										$value = $fieldValues['value'];
-									}
-									break;
-							}
+							$value = $self::getFieldValue($field, $entryData[$fieldId], $qualifier);
 							break;
 						}
 					}
@@ -322,6 +297,40 @@
 			}, $format);
 		}
 
+		public static function getFieldValue($field, $fieldValues, $qualifier) {
+			//var_dump($fieldValues);
+			//var_dump($field->handle());
+			$value = '';
+			
+			// handle special cases
+			switch ($field->handle()) {
+				case 'selectbox_link':
+					$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
+					$relatedFields = $field->get('related_field_id');
+					$relatedData = $relatedEntry[0]->getData($relatedFields[0], false);
+					
+					//var_dump($relatedData, $fieldValues, $field->get());die;
+					$value = $relatedData['handle'];
+					if (empty($value) || $qualifier == 'value') {
+						$value = $relatedData['value'];
+					}
+					break;
+				case 'date':
+					$value = DateTimeObj::format($fieldValues['value'], $qualifier);
+					break;
+				case 'datetime':
+					$value = DateTimeObj::format($fieldValues['start'], $qualifier);
+					break;
+				default:
+					$value = $fieldValues['handle'];
+					if (empty($value) || $qualifier == 'value') {
+						$value = $fieldValues['value'];
+					}
+					break;
+			}
+			return $value;
+		}
+
 		/**
 		 *
 		 * Builds the UI for the field's settings when creating/editing a section
@@ -329,29 +338,32 @@
 		 * @param array $errors
 		 */
 		public function displaySettingsPanel(&$wrapper, $errors=NULL){
-
 			/* first line, label and such */
 			parent::displaySettingsPanel($wrapper, $errors);
 			
-			/* new line, anchor label */
-			$anchor_wrap = new XMLElement('div', NULL, array('class'=>'link_preview_anchor'));
-			$anchor_title = new XMLElement('label', __('Anchor Label <i>Optional</i>'));
-			$anchor_title->appendChild(Widget::Input('fields['.$this->get('sortorder').'][anchor_label]', $this->get('anchor_label')));
-			$anchor_wrap->appendChild($anchor_title);
+			/* new line */
+			$opts_wrap = new XMLElement('div', NULL, array('class' => 'two columns'));
 			
-			/* new line, url format */
-			$url_wrap = new XMLElement('div', NULL, array('class'=>'link_preview_url'));
+			/* url format */
+			$url_wrap = new XMLElement('div', NULL, array('class' => 'column link_preview_url'));
 			$url_title = new XMLElement('label', __('URL Format <i>Use {$param} syntax</i>'));
 			$url_title->appendChild(Widget::Input('fields['.$this->get('sortorder').'][format]', $this->get('format')));
 			$url_wrap->appendChild($url_title);
+			$opts_wrap->appendChild($url_wrap);
+			
+			/* anchor label */
+			$anchor_wrap = new XMLElement('div', NULL, array('class' => 'column link_preview_anchor'));
+			$anchor_title = new XMLElement('label', __('Anchor Label <i>Optional, Use {$param} syntax, Defaults to the url</i>'));
+			$anchor_title->appendChild(Widget::Input('fields['.$this->get('sortorder').'][anchor_label]', $this->get('anchor_label')));
+			$anchor_wrap->appendChild($anchor_title);
+			$opts_wrap->appendChild($anchor_wrap);
 			
 			/* new line, check boxes */
 			$chk_wrap = new XMLElement('div', NULL, array('class' => 'two columns'));
 			$this->appendShowColumnCheckbox($chk_wrap);
 			$this->appendDisplayUrlCheckbox($chk_wrap);
 			
-			$wrapper->appendChild($anchor_wrap);
-			$wrapper->appendChild($url_wrap);
+			$wrapper->appendChild($opts_wrap);
 			$wrapper->appendChild($chk_wrap);
 		}
 		
@@ -385,13 +397,13 @@
 					'name' => "fields[$order][$key]"
 			));
 			$input->setSelfClosingTag(true);
-		
+			
 			$lbl->prependChild($input);
-		
+			
 			if (isset($errors[$key])) {
 				$lbl = Widget::wrapFormElementWithError($lbl, $errors[$key]);
 			}
-		
+			
 			return $lbl;
 		}
 
@@ -404,7 +416,8 @@
 		 * @return string - the html of the link
 		 */
 		public function prepareTableValue($data, XMLElement $link = null, $entry_id = null){
-			$url = $this->generateUrlFromFormat($entry_id, $this->get('format'), $this->get('parent_section'));
+			$sectionId = $this->get('parent_section');
+			$url = $this->applyFormat($entry_id, $this->get('format'), $sectionId);
 			
 			// does this cell serve as a link ?
 			if (!$link){
@@ -416,7 +429,7 @@
 			}
 			
 			$display_url = $this->get('display_url');
-			$anchor_label = $this->get('anchor_label');
+			$anchor_label = $this->applyFormat($entry_id, $this->get('anchor_label'), $sectionId);
 			
 			// set the label
 			if ($display_url == 'yes') {
