@@ -312,6 +312,9 @@
 					
 					//var_dump($relatedData, $fieldValues, $field->get());die;
 					$value = $relatedData['handle'];
+					if ($qualifier == 'id') {
+						$value = $fieldValues['relation_id'];
+					}
 					if (empty($value) || $qualifier == 'value') {
 						$value = $relatedData['value'];
 					}
