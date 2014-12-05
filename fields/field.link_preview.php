@@ -304,6 +304,7 @@
 			
 			// handle special cases
 			switch ($field->handle()) {
+				case 'association':
 				case 'selectbox_link':
 					$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
 					$relatedFields = $field->get('related_field_id');
