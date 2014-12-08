@@ -20,6 +20,10 @@
 		<!-- None -->
 	</dependencies>
 	<releases>
+		<release version="1.2.1" date="2014-12-08" min="2.3.4" max="2.5.x">
+			- Added Compatibility with "Association Field"
+			- Allow ID-qualifier for associated entries
+		</release>
 		<release version="1.2" date="2014-10-22" min="2.3.4" max="2.5.x">
 			- Added setting "anchor label" (displayed in the entries table and entry heading)
 			- Anchor label can also use the {$param} syntax.
