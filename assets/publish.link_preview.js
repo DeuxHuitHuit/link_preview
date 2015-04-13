@@ -21,18 +21,21 @@
 		var text = elem.attr('data-text');
 		
 		if (!!url) {
-			var link = $('<a />')
+			var li = $('<li />'),
+				link = $('<a />')
 				.text(text)
-				.attr('class', 'link-preview')
+				.attr('class', 'button drawer vertical-right')
 				.attr('href', url)
 				.attr('target', '_blank');
-			
-			target.after(link);
+
+			li.append(link);
+
+			target.append(li);
 		}
 	};
-	
+
 	var init = function () {
-		target = $('#context #breadcrumbs h2');
+		target = $('#context .actions');
 		return $(FIELD_CLASS).each(hookOne);
 	};
 
