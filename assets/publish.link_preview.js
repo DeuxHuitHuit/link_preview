@@ -24,7 +24,7 @@
 			var li = $('<li />'),
 				link = $('<a />')
 				.text(text)
-				.attr('class', 'button drawer vertical-right')
+				.attr('class', 'button drawer vertical-right link-preview')
 				.attr('href', url)
 				.attr('target', '_blank');
 

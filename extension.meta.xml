@@ -20,6 +20,9 @@
 		<!-- None -->
 	</dependencies>
 	<releases>
+		<release version="1.2.2" date="2015-04-13" min="2.3.4" max="2.5.x">
+			- Added preview button to actions bar
+		</release>
 		<release version="1.2.1" date="2014-12-08" min="2.3.4" max="2.5.x">
 			- Added Compatibility with "Association Field"
 			- Allow ID-qualifier for associated entries
