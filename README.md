@@ -1,6 +1,6 @@
 # Link Preview #
 
-Version: 1.2
+Version: 1.2.x
 
 > Offers a field that will place a link to the frontend in the publish pages
 
