@@ -20,6 +20,9 @@
 		<!-- None -->
 	</dependencies>
 	<releases>
+		<release version="1.2.4" date="2016-03-01" min="2.3.4" max="2.6.x">
+			- Parse the url format to request only the needed schema. Improves performance.
+		</release>
 		<release version="1.2.3" date="2015-09-21" min="2.3.4" max="2.6.x">
 			- Compatible with 2.6.x (up to 2.6.3)
 		</release>
