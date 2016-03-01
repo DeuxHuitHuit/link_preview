@@ -221,8 +221,18 @@
 		}
 		
 		private function applyFormat($entryId, $format, $sectionId) {
+			$element_names_regexp = '{\$([a-zA-Z0-9:_-]+)}';
+			// Extract needed schema
+			$element_names = array();
+			$element_count = preg_match_all($element_names_regexp, $format, $element_names);
+			if ($element_count > 0) {
+				$element_names = array_map(function ($element) {
+					return current(explode(':', $element));
+				}, $element_names[1]); // index 1 are captures
+			}
+			
 			// Get all the data for this entry
-			$entryData = EntryManager::fetch($entryId);
+			$entryData = EntryManager::fetch($entryId, null, 1, 0, null, null, false, true, $element_names, false);
 			// Get info for each field
 			$section = SectionManager::fetch($sectionId);
 			$fields = $section->fetchFields();
@@ -235,21 +245,17 @@
 			$sysData = $this->getSystemData($entryId);
 			
 			// get the actual data
-			$entryData = $entryData[0]->getData(null, false);
+			$entryData = current($entryData)->getData(null, false);
 			
 			// cache ourself
 			$self = $this;
 			
 			// find all "variables" and replace them
-			return preg_replace_callback('({\$([a-zA-Z0-9:_-]+)})', function (array $matches) use ($sysData, $entryData, $fields, $self) {
+			return preg_replace_callback('(' . $element_names_regexp . ')', function (array $matches) use ($sysData, $entryData, $fields, $self) {
 				//var_dump($matches);
 				$variable = $matches[1];
 				$value = '';
 				$qualifier = '';
-				
-				//var_dump($matches);die;
-				//var_dump($fields); die;
-				//var_dump($sysData, $entryData);die
 				
 				// check variable for namespace and qualifier
 				if (strpos($variable, 'system:') !== FALSE) {
