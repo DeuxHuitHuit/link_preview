@@ -313,12 +313,16 @@
 				case 'association':
 				case 'selectbox_link':
 					$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
+					if (empty($relatedEntry)) {
+						$value = '';
+						break;
+					}
 					$relatedFields = $field->get('related_field_id');
 					$relatedData = $relatedEntry[0]->getData($relatedFields[0], false);
 					if (empty($relatedEntry) || empty($relatedFields)) {
 						continue;
 					}
-					//var_dump($relatedData, $fieldValues, $field->get());die;
+					
 					$value = $relatedData['handle'];
 					if ($qualifier == 'id') {
 						$value = $fieldValues['relation_id'];
