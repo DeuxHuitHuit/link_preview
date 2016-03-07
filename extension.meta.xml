@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<extension id="link_preview" status="released" xmlns="http://symphony-cms.com/schemas/extension/1.0">
+<extension id="link_preview" status="released" xmlns="http://getsymphony.com/schemas/extension/1.0">
 	<name>Link Preview</name>
 	<description>
 		Offers a field that will place a link to the frontend in the publish pages
@@ -20,6 +20,10 @@
 		<!-- None -->
 	</dependencies>
 	<releases>
+		<release version="1.2.5" date="2016-03-07" min="2.3.4" max="2.x.x">
+			- Updated compatibility info
+			- Fixed a bug when a related entry gets deleted
+		</release>
 		<release version="1.2.4" date="2016-03-01" min="2.3.4" max="2.6.x">
 			- Parse the url format to request only the needed schema. Improves performance.
 		</release>
