@@ -225,10 +225,13 @@
 			// Extract needed schema
 			$element_names = array();
 			$element_count = preg_match_all($element_names_regexp, $format, $element_names);
-			if ($element_count > 0) {
+			if ($element_count > 0 && !empty($element_names[1])) {
 				$element_names = array_map(function ($element) {
 					return current(explode(':', $element));
 				}, $element_names[1]); // index 1 are captures
+			}
+			else {
+				$element_names = array();
 			}
 			
 			// Get all the data for this entry
