@@ -35,7 +35,11 @@
 	};
 
 	var init = function () {
-		target = $('#context .actions');
+		target = Symphony.Elements.context.find('.actions');
+		if (!target.length) {
+			target = $('<ul>').attr('class', 'actions');
+			Symphony.Elements.breadcrumbs.after(target);
+		}
 		return $(FIELD_CLASS).each(hookOne);
 	};
 
