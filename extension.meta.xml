@@ -20,6 +20,9 @@
 		<!-- None -->
 	</dependencies>
 	<releases>
+		<release version="1.2.7" date="2016-07-22" min="2.3.4" max="2.x.x">
+			- Fixed a bug when the action toolbar is not rendered by the server
+		</release>
 		<release version="1.2.6" date="2016-03-08" min="2.3.4" max="2.x.x">
 			- Fixed a bug when no fields are matched when applying the url format
 		</release>
