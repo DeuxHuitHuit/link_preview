@@ -20,6 +20,11 @@
 		<!-- None -->
 	</dependencies>
 	<releases>
+		<release version="1.2.8" date="2016-08-04" min="2.3.4" max="2.x.x">
+			- Supported on PHP 7
+			- Fixed the parameters to fit the parent method
+			- Fixed database update.
+		</release>
 		<release version="1.2.7" date="2016-07-22" min="2.3.4" max="2.x.x">
 			- Fixed a bug when the action toolbar is not rendered by the server
 		</release>
