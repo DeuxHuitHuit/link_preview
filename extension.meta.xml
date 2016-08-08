@@ -20,6 +20,11 @@
 		<!-- None -->
 	</dependencies>
 	<releases>
+		<release version="1.2.8" date="2016-08-04" min="2.3.4" max="2.x.x">
+			- Supported on PHP 7
+			- Fixed the parameters to fit the parent method
+			- Fixed database update
+		</release>
 		<release version="1.2.7" date="2016-07-22" min="2.3.4" max="2.x.x">
 			- Fixed a bug when the action toolbar is not rendered by the server
 		</release>
@@ -31,7 +36,7 @@
 			- Fixed a bug when a related entry gets deleted
 		</release>
 		<release version="1.2.4" date="2016-03-01" min="2.3.4" max="2.6.x">
-			- Parse the url format to request only the needed schema. Improves performance.
+			- Parse the url format to request only the needed schema. Improves performance
 		</release>
 		<release version="1.2.3" date="2015-09-21" min="2.3.4" max="2.6.x">
 			- Compatible with 2.6.x (up to 2.6.3)
