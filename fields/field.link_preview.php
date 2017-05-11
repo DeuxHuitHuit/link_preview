@@ -214,7 +214,11 @@
 			$label = $anchor_label != '' ? $anchor_label : __('Preview');
 
 			$wrapper->setAttribute('data-format', $format);
-			$wrapper->setAttribute('data-url', $url);
+			if($url != __('Entry not found')) {
+				$wrapper->setAttribute('data-url', $url);
+			} else {
+				$wrapper->setAttribute('data-url', '');
+			}
 			$wrapper->setAttribute('data-text', $label);
 			$wrapper->setAttribute('data-entry-exists', !$entry_id ? 'no' : 'yes');
 		}
