@@ -100,7 +100,6 @@
 		 */
 		public function processRawFieldData($data, &$status, &$message = null, $simulate = false, $entry_id = null) {
 			$status = self::__OK__;
-
 			return $data;
 		}
 
@@ -111,7 +110,6 @@
 		 *	the data array to initialize if necessary.
 		 */
 		public function setFromPOST(Array $settings = array()) {
-
 			// call the default behavior
 			parent::setFromPOST($settings);
 
@@ -124,6 +122,15 @@
 			// set new settings
 			$new_settings['format'] = $settings['format'];
 
+			// the anchor label
+			$new_settings['anchor_label'] = $settings['anchor_label'];
+
+			// display url
+			$new_settings['display_url'] = $settings['display_url'] == 'yes' ? 'yes' : 'no';
+
+			// display new
+			$new_settings['display_new'] = $settings['display_new'] == 'yes' ? 'yes' : 'no';
+
 			// save it into the array
 			$this->setArray($new_settings);
 		}
@@ -133,7 +140,6 @@
 		 * Save field settings into the field's table
 		 */
 		public function commit() {
-
 			// if the default implementation works...
 			if(!parent::commit()) return FALSE;
 
@@ -150,15 +156,18 @@
 
 			// the url format
 			$settings['format'] = $this->get('format');
-			
+
 			// the anchor label
 			$settings['anchor_label'] = $this->get('anchor_label');
-			
+
 			// display url
 			$settings['display_url'] = $this->get('display_url') == 'yes' ? 'yes' : 'no';
 
-			// officialy save it
-			return FieldManager::saveSettings( $id, $settings);
+			// display new
+			$settings['display_new'] = $this->get('display_new') == 'yes' ? 'yes' : 'no';
+
+			// officially save it
+			return FieldManager::saveSettings($id, $settings);
 		}
 
 		public function entryDataCleanup($entry_id, $data=NULL){
@@ -193,6 +202,9 @@
 		 * @param string $fieldnamePostfix
 		 */
 		public function displayPublishPanel(XMLElement &$wrapper, $data = NULL, $flagWithError = NULL, $fieldnamePrefix = NULL, $fieldnamePostfix = NULL, $entry_id = NULL) {
+			if (!$entry_id && $this->get('display_new') === 'no') {
+				return;
+			}
 			$sectionId = $this->get('parent_section');
 			$format = $this->get('format');
 			$url = $this->applyFormat($entry_id, $format, $sectionId);
@@ -260,7 +272,6 @@
 			
 			// find all "variables" and replace them
 			return preg_replace_callback('(' . $element_names_regexp . ')', function (array $matches) use ($sysData, $entryData, $fields, $self) {
-				//var_dump($matches);
 				$variable = $matches[1];
 				$value = '';
 				$qualifier = '';
@@ -381,9 +392,10 @@
 			$opts_wrap->appendChild($anchor_wrap);
 			
 			/* new line, check boxes */
-			$chk_wrap = new XMLElement('div', NULL, array('class' => 'two columns'));
+			$chk_wrap = new XMLElement('div', NULL, array('class' => 'three columns'));
 			$this->appendShowColumnCheckbox($chk_wrap);
 			$this->appendDisplayUrlCheckbox($chk_wrap);
+			$this->appendDisplayNewCheckbox($chk_wrap);
 			
 			$wrapper->appendChild($opts_wrap);
 			$wrapper->appendChild($chk_wrap);
@@ -402,7 +414,26 @@
 			$label->appendChild($chk);
 			$label->setValue(__('Display URL in entries table (Instead of anchor label)'), false);
 
-			if ($this->get('display_url') == 'yes') {
+			if ($this->get('display_url') === 'yes') {
+				$chk->setAttribute('checked','checked');
+			}
+			
+			$wrapper->appendChild($label);
+		}
+		
+		/**
+		 *
+		 * Utility (private) function to append a checkbox for the 'display new' setting
+		 * @param XMLElement $wrapper
+		 */
+		private function appendDisplayNewCheckbox(&$wrapper) {
+			$label = new XMLElement('label', NULL, array('class' => 'column'));
+			$chk = new XMLElement('input', NULL, array('name' => 'fields['.$this->get('sortorder').'][display_new]', 'type' => 'checkbox', 'value' => 'yes'));
+			
+			$label->appendChild($chk);
+			$label->setValue(__('Display the link when creating a new entry'), false);
+
+			if ($this->get('display_new') !== 'no') {
 				$chk->setAttribute('checked','checked');
 			}
 			
@@ -498,13 +529,14 @@
 			
 			return Symphony::Database()->query("
 				CREATE TABLE IF NOT EXISTS `$tbl` (
-					`id` 				int(11) unsigned NOT NULL auto_increment,
-					`field_id` 		int(11) unsigned NOT NULL,
+					`id`				int(11) unsigned NOT NULL auto_increment,
+					`field_id`			int(11) unsigned NOT NULL,
 					`format`			varchar(255) NULL,
-					`anchor_label` varchar(255) NULL,
-					`display_url`	ENUM('yes', 'no') DEFAULT 'no',
+					`anchor_label`		varchar(255) NULL,
+					`display_url`		ENUM('yes', 'no') DEFAULT 'no',
+					`display_new`		ENUM('yes', 'no') DEFAULT 'yes',
 					PRIMARY KEY (`id`),
-					KEY `field_id` (`field_id`)
+					UNIQUE KEY `field_id` (`field_id`)
 				)  ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 			");
 		}
@@ -534,7 +566,19 @@
 					ADD COLUMN `display_url` ENUM('yes','no') DEFAULT 'no'
 			");
 		}
+		
+		/**
+		 * Updates the table for the new settings: `display_new`
+		 */
+		public static function updateFieldTable_DisplayNew() {
 
+			$tbl = self::FIELD_TBL_NAME;
+
+			return Symphony::Database()->query("
+				ALTER TABLE  `$tbl`
+					ADD COLUMN `display_new` ENUM('yes','no') DEFAULT 'yes'
+			");
+		}
 
 		/**
 		 *

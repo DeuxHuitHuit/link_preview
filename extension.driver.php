@@ -96,6 +96,11 @@
 				$ret = $ret_anchor && $ret_display;
 			}
 			
+			// are we updating from lower than 1.3.0 ?
+			if ($ret && version_compare($previousVersion,'1.3.0') < 0) {
+				$ret = FieldLink_Preview::updateFieldTable_DisplayNew();
+			}
+			
 			return true;
 		}
 		
