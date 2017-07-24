@@ -238,22 +238,22 @@
 			if (!$entryId) {
 				$entryId = 0;
 			}
-
+			
 			// Get all the data for this entry
 			$entryData = EntryManager::fetch($entryId, null, 1, 0, null, null, false, true, $element_names, false);
 			// Get info for each field
 			$section = SectionManager::fetch($sectionId);
 			$fields = $section->fetchFields();
 			
-			if (!is_array($entryData) || empty($entryData)) {
-				return __('Entry not found');
-			}
-			
 			// capture system params
 			$sysData = $this->getSystemData($entryId);
 			
-			// get the actual data
-			$entryData = current($entryData)->getData(null, false);
+			if (!is_array($entryData) || empty($entryData)) {
+				$entryData = array();
+			} else {
+				// get the actual data
+				$entryData = current($entryData)->getData(null, false);
+			}
 			
 			// cache ourself
 			$self = $this;
