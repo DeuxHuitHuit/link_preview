@@ -204,6 +204,7 @@
 			$wrapper->setAttribute('data-format', $format);
 			$wrapper->setAttribute('data-url', $url);
 			$wrapper->setAttribute('data-text', $label);
+			$wrapper->setAttribute('data-entry-exists', !$entry_id ? 'no' : 'yes');
 		}
 		
 		private function getSystemData($entryId) {
