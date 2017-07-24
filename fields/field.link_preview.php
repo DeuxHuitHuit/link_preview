@@ -198,7 +198,7 @@
 			$url = $this->applyFormat($entry_id, $format, $sectionId);
 			$anchor_label = $this->applyFormat($entry_id, $this->get('anchor_label'), $sectionId);
 			
-			// set the label : use `preview` if no ànchor label` is defined
+			// set the label : use `preview` if no anchor label` is defined
 			$label = $anchor_label != '' ? $anchor_label : __('Preview');
 			
 			$wrapper->setAttribute('data-format', $format);
@@ -307,8 +307,6 @@
 		}
 
 		public static function getFieldValue($field, $fieldValues, $qualifier) {
-			//var_dump($fieldValues);
-			//var_dump($field->handle());
 			$value = '';
 			
 			// handle special cases
