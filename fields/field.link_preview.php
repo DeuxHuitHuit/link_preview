@@ -209,7 +209,7 @@
 		
 		private function getSystemData($entryId) {
 			return array(
-				'system:id' => $entryId,
+				'system:id' => !$entryId ? '': $entryId,
 				'system:time' => DateTimeObj::format('now','H:i'),
 				'system:date' => DateTimeObj::format('now', 'Y-m-d'),
 				'system:day' => DateTimeObj::format('now','d'),
@@ -235,6 +235,10 @@
 				$element_names = array();
 			}
 			
+			if (!$entryId) {
+				$entryId = 0;
+			}
+
 			// Get all the data for this entry
 			$entryData = EntryManager::fetch($entryId, null, 1, 0, null, null, false, true, $element_names, false);
 			// Get info for each field
