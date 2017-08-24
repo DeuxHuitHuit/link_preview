@@ -82,7 +82,7 @@
 		 */
 		public function checkPostFieldData($data, &$message, $entry_id = null){
 			// Always valid!
-			$message = NULL;
+			$message = null;
 			return self::__OK__;
 		}
 
@@ -141,12 +141,12 @@
 		 */
 		public function commit() {
 			// if the default implementation works...
-			if(!parent::commit()) return FALSE;
+			if(!parent::commit()) return false;
 
 			$id = $this->get('id');
 
 			// exit if there is no id
-			if($id == false) return FALSE;
+			if($id == false) return false;
 
 			// declare an array contains the field's settings
 			$settings = array();
@@ -170,7 +170,7 @@
 			return FieldManager::saveSettings($id, $settings);
 		}
 
-		public function entryDataCleanup($entry_id, $data=NULL){
+		public function entryDataCleanup($entry_id, $data = null){
 			// do nothing since we do not have any data table
 		}
 
@@ -182,7 +182,7 @@
 		 * @param $wrapper
 		 * @param $data
 		 */
-		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode = false, $mode = NULL, $entry_id = NULL) {
+		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode = false, $mode = null, $entry_id = null) {
 			// NOTHING
 		}
 
@@ -201,10 +201,11 @@
 		 * @param string $fieldnamePrefix
 		 * @param string $fieldnamePostfix
 		 */
-		public function displayPublishPanel(XMLElement &$wrapper, $data = NULL, $flagWithError = NULL, $fieldnamePrefix = NULL, $fieldnamePostfix = NULL, $entry_id = NULL) {
+		public function displayPublishPanel(XMLElement &$wrapper, $data = null, $flagWithError = null, $fieldnamePrefix = null, $fieldnamePostfix = null, $entry_id = null) {
 			if (!$entry_id && $this->get('display_new') === 'no') {
 				return;
 			}
+
 			$sectionId = $this->get('parent_section');
 			$format = $this->get('format');
 			$url = $this->applyFormat($entry_id, $format, $sectionId);
@@ -281,7 +282,7 @@
 				$qualifier = '';
 
 				// check variable for namespace and qualifier
-				if (strpos($variable, 'system:') !== FALSE) {
+				if (strpos($variable, 'system:') !== false) {
 					// case '$system:variable'
 					if (substr_count($variable, ':') == 1) {
 						$value = $sysData[$variable];
@@ -299,7 +300,7 @@
 						}
 					}
 				// case '$variable:qualifier'
-				} else if (strpos($variable, ':') !== FALSE) {
+				} else if (strpos($variable, ':') !== false) {
 					$fragments = preg_split('[:]', $variable);
 					$qualifier = $fragments[1];
 					$variable = $fragments[0];
@@ -375,12 +376,12 @@
 		 * @param XMLElement $wrapper
 		 * @param array $errors
 		 */
-		public function displaySettingsPanel(XMLElement &$wrapper, $errors=NULL){
+		public function displaySettingsPanel(XMLElement &$wrapper, $errors = null){
 			/* first line, label and such */
 			parent::displaySettingsPanel($wrapper, $errors);
 
 			/* new line */
-			$opts_wrap = new XMLElement('div', NULL, array('class' => 'two columns'));
+			$opts_wrap = new XMLElement('div', null, array('class' => 'two columns'));
 
 			/* url format */
 			$url_title = new XMLElement('label', __('URL Format <i>Use {$param} syntax</i>'), array('class' => 'column link_preview_url'));
@@ -393,7 +394,7 @@
 			$opts_wrap->appendChild($anchor_title);
 
 			/* new line, check boxes */
-			$chk_wrap = new XMLElement('div', NULL, array('class' => 'three columns'));
+			$chk_wrap = new XMLElement('div', null, array('class' => 'three columns'));
 			$this->appendShowColumnCheckbox($chk_wrap);
 			$this->appendDisplayUrlCheckbox($chk_wrap);
 			$this->appendDisplayNewCheckbox($chk_wrap);
@@ -408,8 +409,8 @@
 		 * @param XMLElement $wrapper
 		 */
 		private function appendDisplayUrlCheckbox(&$wrapper) {
-			$label = new XMLElement('label', NULL, array('class' => 'column'));
-			$chk = new XMLElement('input', NULL, array('name' => 'fields['.$this->get('sortorder').'][display_url]', 'type' => 'checkbox', 'value' => 'yes'));
+			$label = new XMLElement('label', null, array('class' => 'column'));
+			$chk = new XMLElement('input', null, array('name' => 'fields['.$this->get('sortorder').'][display_url]', 'type' => 'checkbox', 'value' => 'yes'));
 
 			$label->appendChild($chk);
 			$label->setValue(__('Display URL in entries table (Instead of anchor label)'), false);
@@ -441,10 +442,10 @@
 		}
 
 
-		private function createInput($text, $key, $errors=NULL) {
+		private function createInput($text, $key, $errors = null) {
 			$order = $this->get('sortorder');
 			$lbl = new XMLElement('label', __($text), array('class' => 'column'));
-			$input = new XMLElement('input', NULL, array(
+			$input = new XMLElement('input', null, array(
 					'type' => 'text',
 					'value' => $this->get($key),
 					'name' => "fields[$order][$key]"
@@ -529,10 +530,10 @@
 
 			return Symphony::Database()->query("
 				CREATE TABLE IF NOT EXISTS `$tbl` (
-					`id`				int(11) unsigned NOT NULL auto_increment,
-					`field_id`			int(11) unsigned NOT NULL,
-					`format`			varchar(255) NULL,
-					`anchor_label`		varchar(255) NULL,
+					`id` 				INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+					`field_id` 			INT(11) UNSIGNED NOT NULL,
+					`format`			VARCHAR(255) NULL,
+					`anchor_label` 		VARCHAR(255) NULL,
 					`display_url`		ENUM('yes', 'no') DEFAULT 'no',
 					`display_new`		ENUM('yes', 'no') DEFAULT 'yes',
 					PRIMARY KEY (`id`),
@@ -550,7 +551,7 @@
 
 			return Symphony::Database()->query("
 				ALTER TABLE  `$tbl`
-					ADD COLUMN `anchor_label` varchar(255) NULL
+					ADD COLUMN `anchor_label` VARCHAR(255) NULL
 			");
 		}
 
