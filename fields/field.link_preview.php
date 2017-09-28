@@ -329,6 +329,7 @@
 			switch ($field->handle()) {
 				case 'association':
 				case 'selectbox_link':
+				case 'multilingual_selectbox_link':
 					$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
 					if (empty($relatedEntry)) {
 						$value = '';
