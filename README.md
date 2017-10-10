@@ -1,7 +1,5 @@
 # Link Preview #
 
-Version: 1.2.x
-
 > Offers a field that will place a link to the frontend in the publish pages
 
 ### SPECS ###
@@ -56,4 +54,4 @@ MIT <http://deuxhuithuit.mit-license.org>
 
 *Voila !*
 
-Come say hi! -> <http://www.deuxhuithuit.com/>
+Come say hi! -> <https://deuxhuithuit.com/>

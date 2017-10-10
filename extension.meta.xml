@@ -20,6 +20,9 @@
 		<!-- None -->
 	</dependencies>
 	<releases>
+		<release version="1.4.0" date="2017-10-10" min="2.3.4" max="2.x.x">
+			- Add support for multilingual select box link
+		</release>
 		<release version="1.3.0" date="2017-07-24" min="2.3.4" max="2.x.x">
 			- Process the format even if the entry does not exists
 			- Add a setting to hide the field when creating the entry
