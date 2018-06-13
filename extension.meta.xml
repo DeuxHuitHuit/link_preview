@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension id="link_preview" status="released" xmlns="http://getsymphony.com/schemas/extension/1.0">
-	<name>Link Preview</name>
+	<name>Field: Link Preview</name>
 	<description>
 		Offers a field that will place a link to the frontend in the publish pages
 	</description>
