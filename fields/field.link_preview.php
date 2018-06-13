@@ -525,60 +525,92 @@
 		 * Creates the table needed for the settings of the field
 		 */
 		public static function createFieldTable() {
-
-			$tbl = self::FIELD_TBL_NAME;
-
-			return Symphony::Database()->query("
-				CREATE TABLE IF NOT EXISTS `$tbl` (
-					`id` 				INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
-					`field_id` 			INT(11) UNSIGNED NOT NULL,
-					`format`			VARCHAR(255) NULL,
-					`anchor_label` 		VARCHAR(255) NULL,
-					`display_url`		ENUM('yes', 'no') DEFAULT 'no',
-					`display_new`		ENUM('yes', 'no') DEFAULT 'yes',
-					PRIMARY KEY (`id`),
-					UNIQUE KEY `field_id` (`field_id`)
-				)  ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-			");
+			return Symphony::Database()
+				->create(self::FIELD_TBL_NAME)
+				->ifNotExists()
+				->charset('utf8')
+				->collate('utf8_unicode_ci')
+				->fields([
+					'id' => [
+						'type' => 'int(11)',
+						'auto' => true,
+					],
+					'field_id' => 'int(11)',
+					'format' => [
+						'type' => 'varchar(255)',
+						'null' => true,
+					],
+					'anchor_label' => [
+						'type' => 'varchar(255)',
+						'null' => true,
+					],
+					'display_url' => [
+						'type' => 'enum',
+						'values' => ['yes', 'no'],
+						'default' => 'no',
+					],
+					'display_new' => [
+						'type' => 'enum',
+						'values' => ['yes', 'no'],
+						'default' => 'yes',
+					],
+				])
+				->keys([
+					'id' => 'primary',
+					'field_id' => 'unique',
+				])
+				->execute()
+				->success();
 		}
 
 		/**
 		 * Updates the table for the new settings: `anchor_label`
 		 */
 		public static function updateFieldTable_AnchorLabel() {
-
-			$tbl = self::FIELD_TBL_NAME;
-
-			return Symphony::Database()->query("
-				ALTER TABLE  `$tbl`
-					ADD COLUMN `anchor_label` VARCHAR(255) NULL
-			");
+			return Symphony::Database()
+				->alter(self::FIELD_TBL_NAME)
+				->add([
+					'anchor_label' => [
+						'type' => 'varchar(255)',
+						'null' => true,
+					],
+				])
+				->execute()
+				->success();
 		}
 
 		/**
 		 * Updates the table for the new settings: `display_url`
 		 */
 		public static function updateFieldTable_DisplayUrl() {
-
-			$tbl = self::FIELD_TBL_NAME;
-
-			return Symphony::Database()->query("
-				ALTER TABLE  `$tbl`
-					ADD COLUMN `display_url` ENUM('yes','no') DEFAULT 'no'
-			");
+			return Symphony::Database()
+				->alter(self::FIELD_TBL_NAME)
+				->add([
+					'display_url' => [
+						'type' => 'enum',
+						'values' => ['yes', 'no'],
+						'default' => 'no',
+					],
+				])
+				->execute()
+				->success();
 		}
 
 		/**
 		 * Updates the table for the new settings: `display_new`
 		 */
 		public static function updateFieldTable_DisplayNew() {
-
-			$tbl = self::FIELD_TBL_NAME;
-
-			return Symphony::Database()->query("
-				ALTER TABLE  `$tbl`
-					ADD COLUMN `display_new` ENUM('yes','no') DEFAULT 'yes'
-			");
+			return Symphony::Database()
+				->alter(self::FIELD_TBL_NAME)
+				->add([
+					'display_new' => [
+						'type' => 'enum',
+						'values' => ['yes', 'no'],
+						'default' => 'yes',
+					],
+				])
+				->execute()
+				->success();
 		}
 
 		/**
@@ -586,11 +618,11 @@
 		 * Drops the table needed for the settings of the field
 		 */
 		public static function deleteFieldTable() {
-			$tbl = self::FIELD_TBL_NAME;
-
-			return Symphony::Database()->query("
-				DROP TABLE IF EXISTS `$tbl`
-			");
+			return Symphony::Database()
+				->drop(self::FIELD_TBL_NAME)
+				->ifExists()
+				->execute()
+				->success();
 		}
 
 	}
