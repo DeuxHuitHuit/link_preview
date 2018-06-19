@@ -257,20 +257,24 @@
 			}
 
 			// Get all the data for this entry
-			$entryData = EntryManager::fetch($entryId, null, 1, 0, null, null, false, true, $element_names, false);
+			$entryData = (new EntryManager)
+				->select()
+				->entry($entryId)
+				->schema($element_names)
+				->limit(1)
+				->execute()
+				->next()
+				->getData(null, false);
 			// Get info for each field
-			$section = SectionManager::fetch($sectionId);
+			$section = (new SectionManager)
+				->select()
+				->section($sectionId)
+				->execute()
+				->next();
 			$fields = $section->fetchFields();
 
 			// capture system params
 			$sysData = $this->getSystemData($entryId);
-
-			if (!is_array($entryData) || empty($entryData)) {
-				$entryData = array();
-			} else {
-				// get the actual data
-				$entryData = current($entryData)->getData(null, false);
-			}
 
 			// cache ourself
 			$self = $this;
@@ -309,9 +313,13 @@
 				// check fields if no value is set yet
 				if (strlen($value) < 1) {
 					// find value by handle
-					foreach ($fields as $fieldId => $field) {
+					foreach ($fields as $key => $field) {
 						if ($field->get('element_name') == $variable) {
-							$value = $self::getFieldValue($field, $entryData[$fieldId], $qualifier);
+							if (strlen($qualifier) < 1) {
+								$qualifier = 'value';
+							}
+
+							$value = $self::getFieldValue($field, $entryData[$field->get('id')], $qualifier);
 							break;
 						}
 					}
