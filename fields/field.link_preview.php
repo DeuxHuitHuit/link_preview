@@ -343,7 +343,11 @@
 				case 'association':
 				case 'selectbox_link':
 				case 'multilingual_selectbox_link':
-					$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
+					$relatedEntry = (new EntryManager)
+						->select()
+						->entry($fieldValues['relation_id'])
+						->execute()
+						->next();
 					if (empty($relatedEntry)) {
 						$value = '';
 						break;
