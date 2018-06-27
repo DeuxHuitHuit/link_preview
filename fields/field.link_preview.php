@@ -315,10 +315,6 @@
 					// find value by handle
 					foreach ($fields as $key => $field) {
 						if ($field->get('element_name') == $variable) {
-							if (strlen($qualifier) < 1) {
-								$qualifier = 'value';
-							}
-
 							$value = $self::getFieldValue($field, $entryData[$field->get('id')], $qualifier);
 							break;
 						}
