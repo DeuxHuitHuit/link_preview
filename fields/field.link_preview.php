@@ -254,17 +254,19 @@
 
 			if (!$entryId) {
 				$entryId = 0;
+				$entryData = array();
+			} else {
+				// Get all the data for this entry
+				$entryData = (new EntryManager)
+					->select()
+					->entry($entryId)
+					->schema($element_names)
+					->limit(1)
+					->execute()
+					->next()
+					->getData(null, false);
 			}
 
-			// Get all the data for this entry
-			$entryData = (new EntryManager)
-				->select()
-				->entry($entryId)
-				->schema($element_names)
-				->limit(1)
-				->execute()
-				->next()
-				->getData(null, false);
 			// Get info for each field
 			$section = (new SectionManager)
 				->select()
