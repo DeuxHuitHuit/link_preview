@@ -344,6 +344,8 @@
 					$relatedEntry = (new EntryManager)
 						->select()
 						->entry($fieldValues['relation_id'])
+						->section((new EntryManager)->fetchEntrySectionID($fieldValues['relation_id']))
+						->includeAllFields()
 						->execute()
 						->next();
 					if (empty($relatedEntry)) {
@@ -351,7 +353,7 @@
 						break;
 					}
 					$relatedFields = $field->get('related_field_id');
-					$relatedData = $relatedEntry[0]->getData($relatedFields[0], false);
+					$relatedData = $relatedEntry->getData($relatedFields[0], false);
 					if (empty($relatedEntry) || empty($relatedFields)) {
 						continue;
 					}
