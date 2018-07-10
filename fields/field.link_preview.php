@@ -341,6 +341,11 @@
 				case 'association':
 				case 'selectbox_link':
 				case 'multilingual_selectbox_link':
+					if (is_null($fieldValues['relation_id'])) {
+						$value = '';
+						break;
+					}
+
 					$relatedEntry = (new EntryManager)
 						->select()
 						->entry($fieldValues['relation_id'])
@@ -348,10 +353,6 @@
 						->includeAllFields()
 						->execute()
 						->next();
-					if (empty($relatedEntry)) {
-						$value = '';
-						break;
-					}
 					$relatedFields = $field->get('related_field_id');
 					$relatedData = $relatedEntry->getData($relatedFields[0], false);
 					if (empty($relatedEntry) || empty($relatedFields)) {
