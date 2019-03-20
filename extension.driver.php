@@ -52,14 +52,7 @@
 
 			// publish page, new or edit
 			if(isset($c['context']['section_handle']) && in_array($c['context']['page'], array('new', 'edit'))){
-				
-				Administration::instance()->Page->addStylesheetToHead(
-						URL . '/extensions/link_preview/assets/publish.link_preview.css',
-						'screen',
-						time(),
-						false
-				);
-				
+
 				Administration::instance()->Page->addScriptToHead(
 					URL . '/extensions/link_preview/assets/publish.link_preview.js',
 					time() + 1,
@@ -69,22 +62,22 @@
 				return;
 			}
 		}
-		
-		
+
+
 		/* ********* INSTALL/UPDATE/UNINSTALL ******* */
-		
+
 		/**
 		 * Creates the table needed for the settings of the field
 		 */
 		public function install() {
 			return FieldLink_Preview::createFieldTable();
 		}
-		
+
 		/**
 		 * Creates the table needed for the settings of the field
 		 */
 		public function update($previousVersion = false) {
-		
+
 			$ret = true;
 
 			// are we updating from lower than 1.2 ?
@@ -95,15 +88,15 @@
 				// set the return value
 				$ret = $ret_anchor && $ret_display;
 			}
-			
+
 			// are we updating from lower than 1.3.0 ?
 			if ($ret && version_compare($previousVersion,'1.3.0') < 0) {
 				$ret = FieldLink_Preview::updateFieldTable_DisplayNew();
 			}
-			
+
 			return true;
 		}
-		
+
 		/**
 		 *
 		 * Drops the table needed for the settings of the field

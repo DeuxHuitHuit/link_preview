@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension id="link_preview" status="released" xmlns="http://getsymphony.com/schemas/extension/1.0">
-	<name>Link Preview</name>
+	<name>Field: Link Preview</name>
 	<description>
 		Offers a field that will place a link to the frontend in the publish pages
 	</description>
@@ -20,6 +20,11 @@
 		<!-- None -->
 	</dependencies>
 	<releases>
+		<release version="2.0.0" date="TBA" min="4.0.0" max="4.x.x" php-min="5.6.x" php-max="7.x.x">
+			- Update for Symphony 4.x
+			- Code refactoring for Database and EQFA
+			- Replace deprecated method fetch() by select()
+		</release>
 		<release version="1.4.0" date="2017-10-10" min="2.3.4" max="2.x.x">
 			- Add support for multilingual select box link
 		</release>

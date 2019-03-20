@@ -57,7 +57,7 @@
 		public function canPrePopulate(){
 			return false;
 		}
-		
+
 		public function allowDatasourceOutputGrouping(){
 			return false;
 		}
@@ -82,7 +82,7 @@
 		 */
 		public function checkPostFieldData($data, &$message, $entry_id = null){
 			// Always valid!
-			$message = NULL;
+			$message = null;
 			return self::__OK__;
 		}
 
@@ -141,12 +141,12 @@
 		 */
 		public function commit() {
 			// if the default implementation works...
-			if(!parent::commit()) return FALSE;
+			if(!parent::commit()) return false;
 
 			$id = $this->get('id');
 
 			// exit if there is no id
-			if($id == false) return FALSE;
+			if($id == false) return false;
 
 			// declare an array contains the field's settings
 			$settings = array();
@@ -170,7 +170,7 @@
 			return FieldManager::saveSettings($id, $settings);
 		}
 
-		public function entryDataCleanup($entry_id, $data=NULL){
+		public function entryDataCleanup($entry_id, $data = null){
 			// do nothing since we do not have any data table
 		}
 
@@ -182,7 +182,7 @@
 		 * @param $wrapper
 		 * @param $data
 		 */
-		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode = false, $mode = NULL, $entry_id = NULL) {
+		public function appendFormattedElement(XMLElement &$wrapper, $data, $encode = false, $mode = null, $entry_id = null) {
 			// NOTHING
 		}
 
@@ -201,24 +201,29 @@
 		 * @param string $fieldnamePrefix
 		 * @param string $fieldnamePostfix
 		 */
-		public function displayPublishPanel(XMLElement &$wrapper, $data = NULL, $flagWithError = NULL, $fieldnamePrefix = NULL, $fieldnamePostfix = NULL, $entry_id = NULL) {
+		public function displayPublishPanel(XMLElement &$wrapper, $data = null, $flagWithError = null, $fieldnamePrefix = null, $fieldnamePostfix = null, $entry_id = null) {
 			if (!$entry_id && $this->get('display_new') === 'no') {
 				return;
 			}
+
 			$sectionId = $this->get('parent_section');
 			$format = $this->get('format');
 			$url = $this->applyFormat($entry_id, $format, $sectionId);
 			$anchor_label = $this->applyFormat($entry_id, $this->get('anchor_label'), $sectionId);
-			
+
 			// set the label : use `preview` if no anchor label` is defined
 			$label = $anchor_label != '' ? $anchor_label : __('Preview');
-			
+
 			$wrapper->setAttribute('data-format', $format);
-			$wrapper->setAttribute('data-url', $url);
+			if($url != __('Entry not found')) {
+				$wrapper->setAttribute('data-url', $url);
+			} else {
+				$wrapper->setAttribute('data-url', '');
+			}
 			$wrapper->setAttribute('data-text', $label);
 			$wrapper->setAttribute('data-entry-exists', !$entry_id ? 'no' : 'yes');
 		}
-		
+
 		private function getSystemData($entryId) {
 			return array(
 				'system:id' => !$entryId ? '': $entryId,
@@ -232,7 +237,7 @@
 				'system:http-host' => HTTP_HOST,
 			);
 		}
-		
+
 		private function applyFormat($entryId, $format, $sectionId) {
 			$element_names_regexp = '{\$([a-zA-Z0-9:_-]+)}';
 			// Extract needed schema
@@ -246,38 +251,44 @@
 			else {
 				$element_names = array();
 			}
-			
+
 			if (!$entryId) {
 				$entryId = 0;
-			}
-			
-			// Get all the data for this entry
-			$entryData = EntryManager::fetch($entryId, null, 1, 0, null, null, false, true, $element_names, false);
-			// Get info for each field
-			$section = SectionManager::fetch($sectionId);
-			$fields = $section->fetchFields();
-			
-			// capture system params
-			$sysData = $this->getSystemData($entryId);
-			
-			if (!is_array($entryData) || empty($entryData)) {
 				$entryData = array();
 			} else {
-				// get the actual data
-				$entryData = current($entryData)->getData(null, false);
+				// Get all the data for this entry
+				$entryData = (new EntryManager)
+					->select()
+					->entry($entryId)
+					->schema($element_names)
+					->limit(1)
+					->execute()
+					->next()
+					->getData(null, false);
 			}
-			
+
+			// Get info for each field
+			$section = (new SectionManager)
+				->select()
+				->section($sectionId)
+				->execute()
+				->next();
+			$fields = $section->fetchFields();
+
+			// capture system params
+			$sysData = $this->getSystemData($entryId);
+
 			// cache ourself
 			$self = $this;
-			
+
 			// find all "variables" and replace them
 			return preg_replace_callback('(' . $element_names_regexp . ')', function (array $matches) use ($sysData, $entryData, $fields, $self) {
 				$variable = $matches[1];
 				$value = '';
 				$qualifier = '';
-				
+
 				// check variable for namespace and qualifier
-				if (strpos($variable, 'system:') !== FALSE) {
+				if (strpos($variable, 'system:') !== false) {
 					// case '$system:variable'
 					if (substr_count($variable, ':') == 1) {
 						$value = $sysData[$variable];
@@ -295,52 +306,59 @@
 						}
 					}
 				// case '$variable:qualifier'
-				} else if (strpos($variable, ':') !== FALSE) {
+				} else if (strpos($variable, ':') !== false) {
 					$fragments = preg_split('[:]', $variable);
 					$qualifier = $fragments[1];
 					$variable = $fragments[0];
 				}
-				
+
 				// check fields if no value is set yet
 				if (strlen($value) < 1) {
 					// find value by handle
-					foreach ($fields as $fieldId => $field) {
+					foreach ($fields as $key => $field) {
 						if ($field->get('element_name') == $variable) {
-							$value = $self::getFieldValue($field, $entryData[$fieldId], $qualifier);
+							$value = $self::getFieldValue($field, $entryData[$field->get('id')], $qualifier);
 							break;
 						}
 					}
 				}
-				
+
 				// Shortcut for entry ID (only used if no value was found for a field that might use the 'id'-handle)
 				if (strlen($value) < 1 && $variable == 'id') {
 					$value = $sysData['system:'.$variable];
 				}
-				
+
 				return $value;
-				
+
 			}, $format);
 		}
 
 		public static function getFieldValue($field, $fieldValues, $qualifier) {
 			$value = '';
-			
+
 			// handle special cases
 			switch ($field->handle()) {
 				case 'association':
 				case 'selectbox_link':
 				case 'multilingual_selectbox_link':
-					$relatedEntry = EntryManager::fetch($fieldValues['relation_id']);
-					if (empty($relatedEntry)) {
+					if (is_null($fieldValues['relation_id'])) {
 						$value = '';
 						break;
 					}
+
+					$relatedEntry = (new EntryManager)
+						->select()
+						->entry($fieldValues['relation_id'])
+						->section((new EntryManager)->fetchEntrySectionID($fieldValues['relation_id']))
+						->includeAllFields()
+						->execute()
+						->next();
 					$relatedFields = $field->get('related_field_id');
-					$relatedData = $relatedEntry[0]->getData($relatedFields[0], false);
+					$relatedData = $relatedEntry->getData($relatedFields[0], false);
 					if (empty($relatedEntry) || empty($relatedFields)) {
 						continue;
 					}
-					
+
 					$value = $relatedData['handle'];
 					if ($qualifier == 'id') {
 						$value = $fieldValues['relation_id'];
@@ -371,57 +389,52 @@
 		 * @param XMLElement $wrapper
 		 * @param array $errors
 		 */
-		public function displaySettingsPanel(XMLElement &$wrapper, $errors=NULL){
+		public function displaySettingsPanel(XMLElement &$wrapper, $errors = null){
 			/* first line, label and such */
 			parent::displaySettingsPanel($wrapper, $errors);
-			
+
 			/* new line */
-			$opts_wrap = new XMLElement('div', NULL, array('class' => 'two columns'));
-			
+			$opts_wrap = new XMLElement('div', null, array('class' => 'two columns'));
+
 			/* url format */
-			$url_wrap = new XMLElement('div', NULL, array('class' => 'column link_preview_url'));
-			$url_title = new XMLElement('label', __('URL Format <i>Use {$param} syntax</i>'));
+			$url_title = new XMLElement('label', __('URL Format <i>Use {$param} syntax</i>'), array('class' => 'column link_preview_url'));
 			$url_title->appendChild(Widget::Input('fields['.$this->get('sortorder').'][format]', $this->get('format')));
-			$url_wrap->appendChild($url_title);
-			$opts_wrap->appendChild($url_wrap);
-			
+			$opts_wrap->appendChild($url_title);
+
 			/* anchor label */
-			$anchor_wrap = new XMLElement('div', NULL, array('class' => 'column link_preview_anchor'));
-			$anchor_title = new XMLElement('label', __('Anchor Label <i>Optional, Use {$param} syntax, Defaults to the url</i>'));
+			$anchor_title = new XMLElement('label', __('Anchor Label <i>Optional, Use {$param} syntax, Defaults to the url</i>'), array('class' => 'column link_preview_anchor'));
 			$anchor_title->appendChild(Widget::Input('fields['.$this->get('sortorder').'][anchor_label]', $this->get('anchor_label')));
-			$anchor_wrap->appendChild($anchor_title);
-			$opts_wrap->appendChild($anchor_wrap);
-			
+			$opts_wrap->appendChild($anchor_title);
+
 			/* new line, check boxes */
-			$chk_wrap = new XMLElement('div', NULL, array('class' => 'three columns'));
+			$chk_wrap = new XMLElement('div', null, array('class' => 'three columns'));
 			$this->appendShowColumnCheckbox($chk_wrap);
 			$this->appendDisplayUrlCheckbox($chk_wrap);
 			$this->appendDisplayNewCheckbox($chk_wrap);
-			
 			$wrapper->appendChild($opts_wrap);
 			$wrapper->appendChild($chk_wrap);
 		}
-		
-		
+
+
 		/**
 		 *
 		 * Utility (private) function to append a checkbox for the 'display url' setting
 		 * @param XMLElement $wrapper
 		 */
 		private function appendDisplayUrlCheckbox(&$wrapper) {
-			$label = new XMLElement('label', NULL, array('class' => 'column'));
-			$chk = new XMLElement('input', NULL, array('name' => 'fields['.$this->get('sortorder').'][display_url]', 'type' => 'checkbox', 'value' => 'yes'));
-			
+			$label = new XMLElement('label', null, array('class' => 'column'));
+			$chk = new XMLElement('input', null, array('name' => 'fields['.$this->get('sortorder').'][display_url]', 'type' => 'checkbox', 'value' => 'yes'));
+
 			$label->appendChild($chk);
 			$label->setValue(__('Display URL in entries table (Instead of anchor label)'), false);
 
 			if ($this->get('display_url') === 'yes') {
 				$chk->setAttribute('checked','checked');
 			}
-			
+
 			$wrapper->appendChild($label);
 		}
-		
+
 		/**
 		 *
 		 * Utility (private) function to append a checkbox for the 'display new' setting
@@ -430,34 +443,34 @@
 		private function appendDisplayNewCheckbox(&$wrapper) {
 			$label = new XMLElement('label', NULL, array('class' => 'column'));
 			$chk = new XMLElement('input', NULL, array('name' => 'fields['.$this->get('sortorder').'][display_new]', 'type' => 'checkbox', 'value' => 'yes'));
-			
+
 			$label->appendChild($chk);
 			$label->setValue(__('Display the link when creating a new entry'), false);
 
 			if ($this->get('display_new') !== 'no') {
 				$chk->setAttribute('checked','checked');
 			}
-			
+
 			$wrapper->appendChild($label);
 		}
-		
-		
-		private function createInput($text, $key, $errors=NULL) {
+
+
+		private function createInput($text, $key, $errors = null) {
 			$order = $this->get('sortorder');
 			$lbl = new XMLElement('label', __($text), array('class' => 'column'));
-			$input = new XMLElement('input', NULL, array(
+			$input = new XMLElement('input', null, array(
 					'type' => 'text',
 					'value' => $this->get($key),
 					'name' => "fields[$order][$key]"
 			));
 			$input->setSelfClosingTag(true);
-			
+
 			$lbl->prependChild($input);
-			
+
 			if (isset($errors[$key])) {
 				$lbl = Widget::wrapFormElementWithError($lbl, $errors[$key]);
 			}
-			
+
 			return $lbl;
 		}
 
@@ -472,19 +485,19 @@
 		public function prepareTableValue($data, XMLElement $link = null, $entry_id = null){
 			$sectionId = $this->get('parent_section');
 			$url = $this->applyFormat($entry_id, $this->get('format'), $sectionId);
-			
+
 			// does this cell serve as a link ?
 			if (!$link){
 				// if not, wrap our html with a external link to the resource url
 				$link = new XMLElement('a');
-				
+
 				$link->setAttribute('href', $url);
 				$link->setAttribute('target', '_blank');
 			}
-			
+
 			$display_url = $this->get('display_url');
 			$anchor_label = $this->applyFormat($entry_id, $this->get('anchor_label'), $sectionId);
-			
+
 			// set the label
 			if ($display_url == 'yes') {
 				$link->setValue($url);
@@ -493,11 +506,11 @@
 			} else {
 				$link->setValue($this->get('label'));
 			}
-			
+
 			return $link->generate();
 		}
-		
-		
+
+
 		/**
 		 *
 		 * This function allows Fields to cleanup any additional things before it is removed
@@ -508,10 +521,10 @@
 			// @TODO
 			return false;
 		}
-		
-		
+
+
 		/* ********* SQL Data Definition ************* */
-		
+
 		/**
 		 *
 		 * Creates table needed for entries of invidual fields
@@ -520,65 +533,95 @@
 			// no table is needed for entries
 			return true;
 		}
-		
+
 		/**
 		 * Creates the table needed for the settings of the field
 		 */
 		public static function createFieldTable() {
-			
-			$tbl = self::FIELD_TBL_NAME;
-			
-			return Symphony::Database()->query("
-				CREATE TABLE IF NOT EXISTS `$tbl` (
-					`id`				int(11) unsigned NOT NULL auto_increment,
-					`field_id`			int(11) unsigned NOT NULL,
-					`format`			varchar(255) NULL,
-					`anchor_label`		varchar(255) NULL,
-					`display_url`		ENUM('yes', 'no') DEFAULT 'no',
-					`display_new`		ENUM('yes', 'no') DEFAULT 'yes',
-					PRIMARY KEY (`id`),
-					UNIQUE KEY `field_id` (`field_id`)
-				)  ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-			");
+			return Symphony::Database()
+				->create(self::FIELD_TBL_NAME)
+				->ifNotExists()
+				->fields([
+					'id' => [
+						'type' => 'int(11)',
+						'auto' => true,
+					],
+					'field_id' => 'int(11)',
+					'format' => [
+						'type' => 'varchar(255)',
+						'null' => true,
+					],
+					'anchor_label' => [
+						'type' => 'varchar(255)',
+						'null' => true,
+					],
+					'display_url' => [
+						'type' => 'enum',
+						'values' => ['yes', 'no'],
+						'default' => 'no',
+					],
+					'display_new' => [
+						'type' => 'enum',
+						'values' => ['yes', 'no'],
+						'default' => 'yes',
+					],
+				])
+				->keys([
+					'id' => 'primary',
+					'field_id' => 'unique',
+				])
+				->execute()
+				->success();
 		}
-		
+
 		/**
 		 * Updates the table for the new settings: `anchor_label`
 		 */
 		public static function updateFieldTable_AnchorLabel() {
-
-			$tbl = self::FIELD_TBL_NAME;
-
-			return Symphony::Database()->query("
-				ALTER TABLE  `$tbl`
-					ADD COLUMN `anchor_label` varchar(255) NULL
-			");
+			return Symphony::Database()
+				->alter(self::FIELD_TBL_NAME)
+				->add([
+					'anchor_label' => [
+						'type' => 'varchar(255)',
+						'null' => true,
+					],
+				])
+				->execute()
+				->success();
 		}
-		
+
 		/**
 		 * Updates the table for the new settings: `display_url`
 		 */
 		public static function updateFieldTable_DisplayUrl() {
-
-			$tbl = self::FIELD_TBL_NAME;
-
-			return Symphony::Database()->query("
-				ALTER TABLE  `$tbl`
-					ADD COLUMN `display_url` ENUM('yes','no') DEFAULT 'no'
-			");
+			return Symphony::Database()
+				->alter(self::FIELD_TBL_NAME)
+				->add([
+					'display_url' => [
+						'type' => 'enum',
+						'values' => ['yes', 'no'],
+						'default' => 'no',
+					],
+				])
+				->execute()
+				->success();
 		}
-		
+
 		/**
 		 * Updates the table for the new settings: `display_new`
 		 */
 		public static function updateFieldTable_DisplayNew() {
-
-			$tbl = self::FIELD_TBL_NAME;
-
-			return Symphony::Database()->query("
-				ALTER TABLE  `$tbl`
-					ADD COLUMN `display_new` ENUM('yes','no') DEFAULT 'yes'
-			");
+			return Symphony::Database()
+				->alter(self::FIELD_TBL_NAME)
+				->add([
+					'display_new' => [
+						'type' => 'enum',
+						'values' => ['yes', 'no'],
+						'default' => 'yes',
+					],
+				])
+				->execute()
+				->success();
 		}
 
 		/**
@@ -586,11 +629,11 @@
 		 * Drops the table needed for the settings of the field
 		 */
 		public static function deleteFieldTable() {
-			$tbl = self::FIELD_TBL_NAME;
-
-			return Symphony::Database()->query("
-				DROP TABLE IF EXISTS `$tbl`
-			");
+			return Symphony::Database()
+				->drop(self::FIELD_TBL_NAME)
+				->ifExists()
+				->execute()
+				->success();
 		}
 
 	}
