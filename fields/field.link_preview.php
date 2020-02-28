@@ -338,6 +338,7 @@
 					$relatedFields = $field->get('related_field_id');
 					$relatedData = $relatedEntry[0]->getData($relatedFields[0], false);
 					if (empty($relatedEntry) || empty($relatedFields)) {
+						value = '';
 						break;
 					}
 					
